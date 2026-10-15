@@ -1,0 +1,2837 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competency Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.1/dist/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--navy:#172033;--navy-soft:#24314b;--blue:#2563eb;--page:#f4f7fb;--ink:#172033;--muted:#64748b;--line:#e7edf5;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;width:100%;color:var(--ink);font-family:"Work Sans",sans-serif;background:var(--page)}
+.dashboard-shell{width:100%;min-height:100vh;display:flex}
+.sidebar{width:250px;min-height:100vh;position:sticky;top:0;align-self:flex-start;padding:28px 16px;background:var(--navy);color:#fff;display:flex;flex-direction:column;flex-shrink:0}
+.brand{display:flex;gap:11px;align-items:center;padding:0 12px 30px;border-bottom:1px solid rgba(255,255,255,.1)}
+.brand-mark{width:34px;height:34px;display:grid;place-items:center;background:#3b82f6;border-radius:10px;font-weight:700}
+.menu-caption{color:#94a3b8;font-size:11px;font-weight:700;letter-spacing:.1em;margin:29px 12px 11px}
+.nav-list{display:grid;gap:6px}
+.nav-item{border:0;width:100%;color:#cbd5e1;background:transparent;border-radius:10px;padding:12px;cursor:pointer;display:flex;align-items:center;gap:11px;text-align:left;font:inherit;transition:.2s}
+.nav-item:hover{background:var(--navy-soft);color:#fff;transform:translateX(2px)}
+.nav-item.active{background:var(--blue);color:#fff;box-shadow:0 7px 20px rgba(37,99,235,.25)}
+.nav-icon{width:20px;text-align:center;font-size:17px}.nav-text{font-size:14px;font-weight:600}
+.workspace{width:100%;min-width:0;padding:31px 36px 42px}
+.dashboard-footer{margin-top:30px;padding:18px 20px;border-top:1px solid var(--line);color:#64748b;text-align:center;font-size:12px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:29px;flex-wrap:wrap}
+.page-title{margin:0;font-size:clamp(25px,3vw,35px);line-height:1.17;letter-spacing:-.035em}
+.page-subtitle{margin:9px 0 0;color:var(--muted);font-size:14px}
+.profile-chip{white-space:nowrap;background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:11px;color:#334155;font-size:14px;font-weight:600}
+.btn-logout{background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:11px;cursor:pointer;font:inherit;font-size:14px;font-weight:600;color:#dc2626}
+.btn-logout:hover{background:#fef2f2}
+.view{display:none;animation:enter .3s ease both}.view.active{display:block}
+@keyframes enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 7px 20px rgba(15,23,42,.045)}
+.kpi-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:14px;margin-bottom:23px}
+.kpi-card{padding:18px;min-width:0;border-top:4px solid #dbeafe}
+.kpi-card-a{border-top-color:#f59e0b}
+.kpi-card-b{border-top-color:#3b82f6}
+.kpi-card-c{border-top-color:#22c55e}
+.kpi-card-d{border-top-color:#8b5cf6}
+.kpi-label{color:var(--muted);font-size:15px;font-weight:600}.kpi-value{font-size:30px;font-weight:700;line-height:1.2;margin:11px 0 7px}.kpi-note{color:#64748b;font-size:11px}
+.content-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:20px}
+.panel-heading{margin:0;padding:20px 21px 0;font-size:17px}
+.distribution{padding:18px 21px 22px;display:grid;gap:17px}
+.interpretation{padding:16px 21px 22px;display:grid;gap:12px}.grade-explain{display:flex;align-items:flex-start;gap:10px;color:#475569;font-size:13px}.grade-key{min-width:25px;height:25px;display:grid;place-items:center;border-radius:7px;color:#fff;font-weight:700;font-size:12px}
+.machine-overview{margin-top:20px;padding-bottom:20px}.process-group{margin:17px 21px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden}.process-title{padding:12px 15px;background:#f8fafc;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.process-title strong{font-size:14px}.process-title span{font-size:12px;color:var(--muted)}
+.machine-grid{padding:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.machine-card{padding:14px;border:1px solid var(--line);border-radius:11px}.machine-name{font-weight:700;font-size:14px}.machine-meta{color:var(--muted);font-size:12px;margin:5px 0 12px}.machine-grade-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.machine-grade{text-align:center;background:#f8fafc;border-radius:8px;padding:7px 2px;font-size:10px;color:#64748b}.machine-grade strong{display:block;color:#1e293b;font-size:14px;margin-top:2px}
+.table-panel{overflow:hidden}.table-title-row{padding:20px 21px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.table-title{margin:0;font-size:18px}.table-scroll{width:100%;overflow-x:auto}table{width:100%;min-width:900px;border-collapse:collapse}th{padding:12px 16px;background:#f8fafc;color:#64748b;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:.045em;white-space:nowrap;text-align:left}td{padding:14px 16px;border-bottom:1px solid #eef2f7;color:#334155;font-size:13px}tbody tr:hover{background:#fafcff}.employee-name{color:#172033;font-weight:600}
+.grade-badge,.line-pill,.status-pill,.count-pill{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;font-size:11px;font-weight:700;padding:5px 9px}.grade-a{background:#fef3c7;color:#a16207}.grade-b{background:#dbeafe;color:#1d4ed8}.grade-c{background:#dcfce7;color:#15803d}.grade-d{background:#ede9fe;color:#6d28d9}.line-pill{background:#eaf1ff;color:#31599e}.count-pill{background:#f1f5f9;color:#475569}.empty-row{text-align:center;color:#64748b;padding:28px}
+.status-pill{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;font-size:11px;font-weight:700;padding:5px 9px;background:#f1f5f9;color:#475569}
+.status-aktif{background:#dcfce7;color:#15803d}.status-nonaktif{background:#fee2e2;color:#b91c1c}
+.btn{background:#2563eb;color:#fff;border:0;padding:10px 16px;border-radius:9px;font:inherit;font-weight:600;cursor:pointer;font-size:13px;transition:.15s}
+.btn:hover{filter:brightness(.92)}.btn-sm{padding:6px 10px;font-size:12px}.btn-danger{background:#dc2626}.btn-secondary{background:#eef2f7;color:#334155}.btn-backup{background:#9333ea}
+.filter-bar{padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:16px}
+.filter-group{display:grid;gap:6px;flex:1;min-width:160px}
+.filter-label{font-size:12px;color:#475569;font-weight:700}
+.field{width:100%;min-height:42px;border:1px solid #dbe3ee;border-radius:9px;background:#fff;padding:0 12px;color:#334155;font:inherit;font-size:13px;outline:none}
+.field:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;place-items:center;z-index:1000;padding:20px}
+.modal-backdrop.show{display:grid}
+.modal{background:#fff;border-radius:16px;padding:28px;width:min(520px,100%);box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto}
+.modal h3{margin:0 0 18px;font-size:20px;color:#172033}
+.modal label{display:block;font-size:12px;font-weight:700;color:#475569;margin:12px 0 5px}
+.modal input,.modal select,.modal textarea{width:100%;min-height:42px;border:1px solid #dbe3ee;border-radius:9px;padding:0 12px;font:inherit;font-size:14px;outline:none;background:#fff}
+.modal textarea{min-height:70px;padding:10px 12px;resize:vertical}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+.btn-add-line{margin-top:8px;width:100%;min-height:38px;background:#eff6ff;color:#2563eb;border:1px dashed #93c5fd;border-radius:9px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;transition:.15s}
+.btn-add-line:hover{background:#dbeafe;border-color:#2563eb}
+.toast{position:fixed;top:20px;right:20px;background:#16a34a;color:#fff;padding:14px 20px;border-radius:10px;font-weight:600;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:2000;animation:slideIn .3s ease}
+.toast.error{background:#dc2626}.toast.info{background:#2563eb}
+@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+.grade-section{margin-bottom:16px;border:2px solid #e7edf5;border-radius:14px;overflow:hidden;background:#fff;transition:.25s}
+.grade-section.locked{opacity:.55;background:#f8fafc}
+.grade-section.active{border-color:#2563eb;box-shadow:0 8px 24px -6px rgba(37,99,235,.25)}
+.grade-section.passed{border-color:#16a34a}
+.grade-section-header{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;background:#f8fafc;border-bottom:1px solid #e7edf5}
+.grade-section.active .grade-section-header{background:#eff6ff;border-bottom-color:#bfdbfe}
+.grade-section.passed .grade-section-header{background:#f0fdf4;border-bottom-color:#86efac}
+.grade-section.locked .grade-section-header{background:#f1f5f9}
+.grade-title-wrap{display:flex;align-items:center;gap:12px}
+.grade-circle{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:17px;flex-shrink:0}
+.grade-circle.gA{background:#f59e0b}.grade-circle.gB{background:#3b82f6}.grade-circle.gC{background:#22c55e}.grade-circle.gD{background:#8b5cf6}
+.grade-section.locked .grade-circle{background:#94a3b8}
+.grade-section-info h4{margin:0 0 2px;font-size:14px;font-weight:700}
+.grade-section-info p{margin:0;font-size:11px;color:#64748b}
+.grade-status{font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;white-space:nowrap}
+.grade-status.passed{background:#dcfce7;color:#15803d}
+.grade-status.active{background:#dbeafe;color:#1d4ed8}
+.grade-status.locked{background:#e2e8f0;color:#475569}
+.kriteria-check-box{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:2px solid #cbd5e1;border-radius:6px;cursor:pointer;transition:.15s;background:#fff}
+.kriteria-check-box:hover{border-color:#2563eb}
+.kriteria-check-box.checked{background:#16a34a;border-color:#16a34a}
+.kriteria-check-box.checked::after{content:"✓";color:#fff;font-weight:700;font-size:15px}
+.kriteria-check-box.disabled{cursor:not-allowed;opacity:.4;pointer-events:none}
+.kat-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.03em}
+.kat-K{background:#fef3c7;color:#a16207}.kat--{background:#f1f5f9;color:#64748b}
+input.mini-field{width:100%;min-height:32px;border:1px solid #dbe3ee;border-radius:7px;padding:0 8px;font:inherit;font-size:12px;background:#fff}
+input.mini-field:focus{outline:none;border-color:#2563eb}
+input.mini-field:disabled{background:#f1f5f9;color:#94a3b8}
+tr.row-lulus{background:#f0fdf4}
+tr.row-lulus td:first-child{position:relative}
+tr.row-lulus td:first-child::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#16a34a}
+.raport-timeline{display:grid;gap:14px}
+.raport-card{padding:20px 24px;border:1px solid var(--line);border-radius:14px;background:#fff;transition:.15s}
+.raport-card:hover{border-color:#cbd5e1;box-shadow:0 4px 12px rgba(0,0,0,.04)}
+.raport-card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.raport-card-title{font-weight:700;font-size:16px;color:#172033;display:flex;align-items:center;gap:8px}
+.raport-card-meta{font-size:12px;color:#64748b;margin-top:4px}
+.grade-progress-row{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;margin-bottom:10px}
+.grade-letter-box{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px}
+.grade-letter-box.A{background:#f59e0b}.grade-letter-box.B{background:#3b82f6}.grade-letter-box.C{background:#22c55e}.grade-letter-box.D{background:#8b5cf6}
+.grade-progress-bar{height:8px;background:#eef2f7;border-radius:999px;overflow:hidden}
+.grade-progress-fill{height:100%;border-radius:999px;transition:.3s}
+.grade-progress-fill.A{background:#f59e0b}.grade-progress-fill.B{background:#3b82f6}.grade-progress-fill.C{background:#22c55e}.grade-progress-fill.D{background:#8b5cf6}
+.grade-progress-fill.empty{background:#e2e8f0}
+.grade-progress-pct{font-size:12px;font-weight:700;color:#64748b}
+.grade-progress-pct.full{color:#16a34a}
+.grade-pct-wrap{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.search-raport-box{padding:18px 20px;background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid var(--line);border-radius:14px;margin-bottom:16px}
+.top10-rank{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:12px;color:#fff}
+.top10-rank.r1{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
+.top10-rank.r2{background:linear-gradient(135deg,#cbd5e1,#94a3b8)}
+.top10-rank.r3{background:linear-gradient(135deg,#fb923c,#ea580c)}
+.top10-rank.rn{background:#e2e8f0;color:#475569}
+.detail-operator-header{display:flex;gap:16px;align-items:center;padding:18px 20px;background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid #e7edf5;border-radius:14px;margin-bottom:18px;flex-wrap:wrap}
+.detail-op-avatar{width:60px;height:60px;border-radius:16px;background:#eff6ff;display:grid;place-items:center;font-size:22px;font-weight:700;color:#2563eb;flex-shrink:0}
+.detail-op-info h3{margin:0 0 4px;font-size:18px}
+.detail-op-info p{margin:0;font-size:12px;color:#64748b}
+.detail-op-stats{margin-left:auto;display:flex;gap:20px;flex-wrap:wrap}
+.detail-stat{text-align:center}
+.detail-stat-label{font-size:10px;color:#64748b;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.detail-stat-value{font-size:22px;font-weight:700;color:#172033;margin-top:2px}
+.mesin-list{display:flex;flex-direction:column;gap:10px}
+.mesin-item{padding:14px 18px;border:1px solid #e7edf5;border-radius:12px;background:#fff;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.mesin-item-title{font-weight:700;font-size:14px;color:#172033}
+.mesin-item-meta{font-size:11px;color:#64748b;margin-top:4px}
+.mesin-item-right{text-align:right}
+#detail-op-suggest > div{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e7edf5;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:100;max-height:280px;overflow-y:auto;margin-top:4px}
+.log-action-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.03em}
+.log-add{background:#dcfce7;color:#15803d}
+.log-edit{background:#dbeafe;color:#1d4ed8}
+.log-delete{background:#fee2e2;color:#b91c1c}
+.log-login{background:#e0e7ff;color:#4338ca}
+.log-logout{background:#f3e8ff;color:#7c3aed}
+.log-system{background:#f1f5f9;color:#475569}
+.guest-banner{display:none;margin-bottom:16px;padding:12px 18px;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;color:#92400e;font-size:13px;font-weight:600}
+body.guest-mode .guest-banner{display:block}
+
+/* ===== LOGIN LOCK INFO ===== */
+.lock-info{display:none;margin-top:12px;padding:10px 14px;background:#fef3c7;border:1px solid #fde68a;border-radius:9px;color:#92400e;font-size:12px;font-weight:600;text-align:center;line-height:1.5}
+.lock-info.show{display:block}
+.lock-info strong{color:#78350f}
+
+.reminder-banner{display:none;position:fixed;top:90px;right:24px;width:min(440px,calc(100vw - 48px));max-height:min(70vh,620px);padding:16px 18px;border-radius:16px;flex-wrap:wrap;align-items:flex-start;gap:12px;z-index:900;box-shadow:0 18px 45px rgba(15,23,42,.18),0 4px 14px rgba(15,23,42,.08);backdrop-filter:blur(8px);transition:width .22s ease,height .22s ease,padding .22s ease,border-radius .22s ease,box-shadow .22s ease,transform .22s ease}
+.reminder-banner.show{display:flex}
+.reminder-banner.warn{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fcd34d;color:#78350f}
+.reminder-banner.danger{background:linear-gradient(135deg,#fff1f2,#fee2e2);border:1px solid #fca5a5;color:#7f1d1d}
+.reminder-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.reminder-banner.warn .reminder-icon{background:#f59e0b;color:#fff}
+.reminder-banner.danger .reminder-icon{background:#dc2626;color:#fff;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.reminder-title{font-weight:700;font-size:15px;line-height:1.35;margin-bottom:4px}
+.reminder-subtitle{font-size:12px;font-weight:600;opacity:.85;margin-bottom:10px;line-height:1.45}
+.reminder-content{flex:1;min-width:0;overflow:hidden}
+.reminder-chips{display:flex;flex-wrap:wrap;gap:8px;max-height:220px;overflow-y:auto;padding-right:3px}
+.reminder-chip{padding:6px 12px;border-radius:20px;background:#fff;border:1px solid rgba(0,0,0,.08);font-size:12px;font-weight:700;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;max-width:100%}
+.reminder-chip:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.reminder-chip .days{font-weight:500;opacity:.7;font-size:11px}
+.reminder-minimize{width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;border:1px solid rgba(0,0,0,.1);border-radius:9px;background:rgba(255,255,255,.75);color:inherit;font-size:18px;font-weight:700;line-height:1;cursor:pointer;transition:.15s}
+.reminder-minimize:hover{background:#fff;transform:scale(1.05)}
+.reminder-banner.minimized{width:58px;height:58px;min-height:58px;max-height:58px;padding:0;border-radius:17px;align-items:center;justify-content:center;gap:0;cursor:pointer;box-shadow:0 12px 32px rgba(15,23,42,.22)}
+.reminder-banner.minimized .reminder-icon{width:58px;height:58px;border-radius:17px;font-size:25px}
+.reminder-banner.minimized .reminder-content{display:none}
+.reminder-banner.minimized .reminder-minimize{position:absolute;right:-5px;top:-5px;width:22px;height:22px;min-width:22px;border-radius:50%;font-size:13px;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.16);z-index:2}
+.reminder-banner.minimized .reminder-minimize::after{content:"↗"}
+.reminder-banner.minimized .reminder-minimize{font-size:0}
+body.guest-mode .reminder-chip{cursor:not-allowed;opacity:.55}
+body.guest-mode .reminder-chip:hover{transform:none;box-shadow:none}
+body.guest-mode .reminder-chip::after{content:" 🔒";font-size:10px}
+@media(max-width:620px){
+  .reminder-banner{top:74px;right:12px;width:calc(100vw - 24px);max-height:65vh;padding:14px}
+  .reminder-banner.minimized{width:54px;height:54px;min-height:54px;max-height:54px;padding:0}
+  .reminder-banner.minimized .reminder-icon{width:54px;height:54px}
+}
+@media(max-width:1400px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:1120px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.machine-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:820px){.sidebar{width:76px;padding:20px 10px}.brand{justify-content:center;padding:0 0 24px}.brand-text,.menu-caption,.nav-text{display:none}.nav-item{justify-content:center;padding:12px 6px}.workspace{padding:25px 22px 35px}.content-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.dashboard-shell{display:block}.sidebar{width:100%;min-height:auto;position:static;padding:12px 14px;flex-direction:row;align-items:center;gap:10px}.brand{padding:0;border:0}.nav-list{display:flex;flex:1;justify-content:space-between;gap:4px}.nav-item{width:auto;flex:1}.workspace{padding:22px 15px 30px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.machine-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" style="position:fixed;inset:0;background:linear-gradient(135deg,#172033 0%,#1e3a8a 100%);display:grid;place-items:center;z-index:9999;padding:20px;overflow-y:auto">
+  <form id="login-form" style="background:#fff;padding:36px;border-radius:16px;width:min(400px,100%);box-shadow:0 20px 60px rgba(0,0,0,.3);margin:auto">
+    <div style="width:52px;height:52px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:20px;margin-bottom:20px">EC</div>
+    <h2 style="margin:0 0 6px;font-size:22px;color:#172033">Login Dashboard</h2>
+    <p style="margin:0 0 22px;color:#64748b;font-size:13px">Masukkan kredensial Anda</p>
+    <label style="font-size:12px;font-weight:700;color:#475569">Username</label>
+    <input id="login-username" autocomplete="username" style="width:100%;min-height:44px;border:1px solid #dbe3ee;border-radius:9px;padding:0 12px;margin:6px 0 16px;font:inherit;font-size:14px;outline:none">
+    <label style="font-size:12px;font-weight:700;color:#475569">Password</label>
+    <input id="login-password" type="password" autocomplete="current-password" style="width:100%;min-height:44px;border:1px solid #dbe3ee;border-radius:9px;padding:0 12px;margin:6px 0 16px;font:inherit;font-size:14px;outline:none">
+    <button type="submit" id="login-btn" style="width:100%;min-height:46px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:0;border-radius:9px;font:inherit;font-weight:700;font-size:15px;cursor:pointer">Masuk</button>
+    <div style="display:flex;align-items:center;gap:10px;margin:18px 0 14px">
+      <div style="flex:1;height:1px;background:#e2e8f0"></div>
+      <div style="font-size:11px;color:#94a3b8;font-weight:600;letter-spacing:.05em">ATAU</div>
+      <div style="flex:1;height:1px;background:#e2e8f0"></div>
+    </div>
+    <button type="button" onclick="masukSebagaiGuest()" style="width:100%;min-height:46px;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:9px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      👁️ Masuk sebagai Guest (Lihat saja)
+    </button>
+    <div id="login-error" style="color:#dc2626;font-size:13px;margin-top:12px;text-align:center;min-height:18px"></div>
+    <div id="lock-info" class="lock-info"></div>
+  </form>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard-shell" id="dashboard-shell" style="display:none">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">EC</div><span class="brand-text" style="color:#fff;font-weight:700;font-size:16px">Competency</span></div>
+    <p class="menu-caption">MAIN MENU</p>
+    <nav class="nav-list">
+      <button type="button" class="nav-item active" data-view="dashboard"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></button>
+      <button type="button" class="nav-item" data-view="employee"><span class="nav-icon">👥</span><span class="nav-text">Employee</span></button>
+      <button type="button" class="nav-item" data-view="raport"><span class="nav-icon">📘</span><span class="nav-text">Raport</span></button>
+      <button type="button" class="nav-item" data-view="machine"><span class="nav-icon">⚙️</span><span class="nav-text">Machine</span></button>
+      <button type="button" class="nav-item" data-view="matrix"><span class="nav-icon">📋</span><span class="nav-text">Matrix</span></button>
+      <button type="button" class="nav-item" data-view="history"><span class="nav-icon">📈</span><span class="nav-text">History</span></button>
+      <button type="button" class="nav-item" data-view="kriteria"><span class="nav-icon">📝</span><span class="nav-text">Form Kriteria</span></button>
+      <button type="button" class="nav-item" data-view="audit" data-admin-only><span class="nav-icon">🔍</span><span class="nav-text">Audit Trail</span></button>
+      <button type="button" class="nav-item" data-view="user" data-admin-only><span class="nav-icon">🔐</span><span class="nav-text">User</span></button>
+    </nav>
+  </aside>
+
+  <div id="reminder-banner" class="reminder-banner" role="alert" aria-live="polite" title="Klik untuk memperbesar kembali">
+    <div class="reminder-icon">⏰</div>
+    <div class="reminder-content">
+      <div class="reminder-title" id="reminder-title">Loading...</div>
+      <div class="reminder-subtitle" id="reminder-subtitle">Perhitungan penilaian &gt; 90 hari</div>
+      <div class="reminder-chips" id="reminder-chips"></div>
+    </div>
+    <button type="button" id="reminder-minimize" class="reminder-minimize" onclick="toggleReminder(event)" title="Minimize reminder" aria-label="Minimize reminder">−</button>
+  </div>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title">Employee &amp; Machine Competency</h1>
+        <p class="page-subtitle">Penilaian berkesinambungan dengan sistem grade A–D</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn" id="btn-refresh" onclick="manualRefresh()" style="background:#3b82f6"><span id="refresh-icon">🔄</span> <span id="refresh-text">Refresh</span></button>
+        <button class="btn" onclick="openFormModal()" style="background:#16a34a" data-write-action>✏️ Input Nilai</button>
+        <button class="btn btn-backup" onclick="lakukanBackup()" data-write-action>💾 Backup</button>
+        <button class="btn" data-admin-only onclick="exportPDF()" style="background:#dc2626">📄 PDF</button>
+        <div class="profile-chip" id="profile-chip">👤 Memuat...</div>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="guest-banner">👁️ Mode Guest — Anda hanya dapat melihat data, tidak dapat mengubah apapun.</div>
+
+    <!-- DASHBOARD VIEW -->
+    <section id="dashboard-view" class="view active">
+      <div class="kpi-grid">
+        <article class="panel kpi-card"><div class="kpi-label">Total Employee</div><div id="kpi-employee-value" class="kpi-value">0</div><div class="kpi-note">Data dari sheet Personel</div></article>
+        <article class="panel kpi-card"><div class="kpi-label">Total Dinilai</div><div id="kpi-dinilai-value" class="kpi-value">0</div><div class="kpi-note">Employee × Mesin</div></article>
+        <article class="panel kpi-card"><div class="kpi-label">Total Mesin</div><div id="kpi-machine-value" class="kpi-value">0</div><div class="kpi-note">Master data mesin</div></article>
+        <article class="panel kpi-card kpi-card-a"><div class="kpi-label">Grade A</div><div id="kpi-grade-a-value" class="kpi-value">0</div><div class="kpi-note">Operator baru</div></article>
+        <article class="panel kpi-card kpi-card-b"><div class="kpi-label">Grade B</div><div id="kpi-grade-b-value" class="kpi-value">0</div><div class="kpi-note">Start &amp; stop mesin</div></article>
+        <article class="panel kpi-card kpi-card-c"><div class="kpi-label">Grade C</div><div id="kpi-grade-c-value" class="kpi-value">0</div><div class="kpi-note">Problem &amp; solusi</div></article>
+        <article class="panel kpi-card kpi-card-d"><div class="kpi-label">Grade D</div><div id="kpi-grade-d-value" class="kpi-value">0</div><div class="kpi-note">Trainer</div></article>
+      </div>
+      <div class="content-grid" style="margin-bottom:23px">
+        <section class="panel">
+          <h2 class="panel-heading">Distribusi Kompetensi</h2>
+          <div class="distribution">
+            <div class="grade-progress-row"><div class="grade-letter-box A">A</div><div><div class="grade-progress-bar"><div id="bar-a" class="grade-progress-fill A" style="width:0%"></div></div><div class="grade-pct-wrap"><span class="grade-progress-pct" id="pct-a">0%</span></div></div></div>
+            <div class="grade-progress-row"><div class="grade-letter-box B">B</div><div><div class="grade-progress-bar"><div id="bar-b" class="grade-progress-fill B" style="width:0%"></div></div><div class="grade-pct-wrap"><span class="grade-progress-pct" id="pct-b">0%</span></div></div></div>
+            <div class="grade-progress-row"><div class="grade-letter-box C">C</div><div><div class="grade-progress-bar"><div id="bar-c" class="grade-progress-fill C" style="width:0%"></div></div><div class="grade-pct-wrap"><span class="grade-progress-pct" id="pct-c">0%</span></div></div></div>
+            <div class="grade-progress-row"><div class="grade-letter-box D">D</div><div><div class="grade-progress-bar"><div id="bar-d" class="grade-progress-fill D" style="width:0%"></div></div><div class="grade-pct-wrap"><span class="grade-progress-pct" id="pct-d">0%</span></div></div></div>
+          </div>
+        </section>
+        <section class="panel">
+          <h2 class="panel-heading">Interpretasi Grade</h2>
+          <div class="interpretation">
+            <div class="grade-explain"><span class="grade-key grade-a">A</span><span>Operator baru</span></div>
+            <div class="grade-explain"><span class="grade-key grade-b">B</span><span>Start dan stop mesin</span></div>
+            <div class="grade-explain"><span class="grade-key grade-c">C</span><span>Identifikasi masalah dan solusi</span></div>
+            <div class="grade-explain"><span class="grade-key grade-d">D</span><span>Trainer</span></div>
+          </div>
+        </section>
+      </div>
+      <section class="panel" style="margin-bottom:23px;padding-bottom:20px">
+        <div style="padding:20px 21px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <h2 class="panel-heading" style="padding:0">📊 Top 5 Mesin — Paling Banyak Dikuasai</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select id="alat-filter-area" class="field" style="min-height:36px;font-size:12px;padding:0 10px;width:auto" onchange="renderGrafikAlat()"><option value="">Semua Area</option></select>
+            <select id="alat-filter-grade" class="field" style="min-height:36px;font-size:12px;padding:0 10px;width:auto" onchange="renderGrafikAlat()">
+              <option value="">Semua Grade</option>
+              <option value="A">Grade A</option>
+              <option value="B">Grade B</option>
+              <option value="C">Grade C</option>
+              <option value="D">Grade D</option>
+            </select>
+          </div>
+        </div>
+        <div style="padding:16px 21px 0" id="grafik-alat-content"></div>
+      </section>
+      <section class="panel machine-overview">
+        <h2 class="panel-heading">Machine Competency berdasarkan Area</h2>
+        <div id="machine-overview"></div>
+      </section>
+      <section class="panel" style="margin-top:20px;padding-bottom:20px">
+        <div style="padding:20px 21px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <h2 class="panel-heading" style="padding:0">🏆 Top 10 Operator per Grade</h2>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:600">
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:#f59e0b;display:inline-block"></span>Grade A</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:#3b82f6;display:inline-block"></span>Grade B</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:#22c55e;display:inline-block"></span>Grade C</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:#8b5cf6;display:inline-block"></span>Grade D</span>
+          </div>
+        </div>
+        <div style="padding:16px 21px 0">
+          <div style="position:relative;height:340px"><canvas id="chart-top10"></canvas></div>
+          <div id="top10-detail" style="margin-top:20px"></div>
+        </div>
+      </section>
+      <section class="panel" style="margin-top:20px;padding:0 0 20px">
+        <div style="padding:20px 21px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <h2 class="panel-heading" style="padding:0">👤 Detail Kompetensi per Operator</h2>
+          <div style="position:relative;width:min(280px,100%)">
+            <input id="detail-op-search" class="field" type="search" placeholder="🔍 Cari nama / NIK operator..." oninput="cariOperatorDetail()" autocomplete="off" style="font-size:13px">
+            <div id="detail-op-suggest" style="position:relative"></div>
+          </div>
+        </div>
+        <div style="padding:16px 21px 0">
+          <div id="detail-operator-content">
+            <div class="empty-row" style="text-align:center;padding:40px;color:#64748b">Ketik nama atau NIK operator di atas untuk melihat detail kompetensi</div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- EMPLOYEE VIEW -->
+    <section id="employee-view" class="view">
+      <section class="panel filter-bar">
+        <div class="filter-group"><label class="filter-label">🔍 Cari</label><input id="personel-search" class="field" type="search" placeholder="ID, nama, jabatan..." oninput="renderEmployee()"></div>
+        <div class="filter-group"><label class="filter-label">Status</label><select id="personel-status-filter" class="field" onchange="renderEmployee()"><option value="">Semua</option><option value="Aktif">Aktif</option><option value="Non Aktif">Non Aktif</option></select></div>
+        <div class="filter-group"><label class="filter-label">Organization Name</label><select id="personel-organization-filter" class="field" onchange="renderEmployee()"><option value="">Semua Organization</option></select></div>
+        <button class="btn" data-admin-only onclick="openPersonelModal()" style="margin-bottom:0">+ Tambah Personel</button>
+      </section>
+      <section class="panel table-panel">
+        <div class="table-title-row"><h2 class="table-title">Employee — Sheet Personel</h2></div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>No</th><th>Employee ID</th><th>Nama</th><th>Job Level</th><th>Organization</th><th>Job Title</th><th>Gender</th><th>Start Date</th><th>Status</th><th data-admin-only>Aksi</th></tr></thead>
+            <tbody id="employee-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- RAPORT VIEW -->
+    <section id="raport-view" class="view">
+      <section class="panel search-raport-box">
+        <div style="display:grid;grid-template-columns:1fr 200px 200px;gap:14px;align-items:end">
+          <div class="filter-group"><label class="filter-label">🔍 Cari Nama / NIK</label><input id="raport-search" class="field" type="search" placeholder="Ketik nama atau NIK..." oninput="cariKaryawanRaport()"><div id="raport-search-suggest" style="position:relative"></div></div>
+          <div class="filter-group"><label class="filter-label">Filter Area</label><select id="raport-area-filter" class="field" onchange="renderRaport()"><option value="">Semua Area</option></select></div>
+          <div class="filter-group"><label class="filter-label">Filter Mesin</label><select id="raport-mesin-filter" class="field" onchange="renderRaport()"><option value="">Semua Mesin</option></select></div>
+        </div>
+      </section>
+      <section class="panel" style="padding:22px">
+        <div id="raport-header" style="margin-bottom:20px"></div>
+        <div id="raport-content"></div>
+      </section>
+    </section>
+
+    <!-- MACHINE VIEW -->
+    <section id="machine-view" class="view">
+      <section class="panel filter-bar" style="align-items:center;justify-content:space-between">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" id="machine-tab-competency" onclick="switchMachineTab('competency')" type="button" style="background:#2563eb;color:#fff">📊 Kompetensi</button>
+          <button class="btn" id="machine-tab-manage" onclick="switchMachineTab('manage')" type="button" style="background:#eef2f7;color:#334155" data-admin-only>🛠️ Kelola Mesin & Area</button>
+        </div>
+      </section>
+      <div id="machine-sub-competency">
+        <section class="panel table-panel">
+          <div class="table-title-row"><h2 class="table-title">Machine Competency — Agregasi dari Raport</h2></div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>No</th><th>Mesin</th><th>Area</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Total</th></tr></thead>
+              <tbody id="machine-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <div id="machine-sub-manage" style="display:none">
+        <div class="content-grid" style="grid-template-columns:1fr 1fr;margin-bottom:20px">
+          <section class="panel table-panel">
+            <div class="table-title-row">
+              <h2 class="table-title">🗺️ Master Area</h2>
+              <button class="btn" onclick="openAreaModal()">+ Tambah Area</button>
+            </div>
+            <div class="table-scroll">
+              <table style="min-width:auto">
+                <thead><tr><th>No</th><th>Area</th><th>Sheet Form</th><th style="text-align:right">Aksi</th></tr></thead>
+                <tbody id="area-manage-body"><tr><td colspan="4" class="empty-row">Memuat...</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="panel table-panel">
+            <div class="table-title-row">
+              <h2 class="table-title">⚙️ Master Mesin</h2>
+              <button class="btn" onclick="openMesinModal()" id="btn-tambah-mesin" disabled>+ Tambah Mesin</button>
+            </div>
+            <div class="table-scroll">
+              <table style="min-width:auto">
+                <thead><tr><th>No</th><th>Mesin</th><th>Area</th><th style="text-align:right">Aksi</th></tr></thead>
+                <tbody id="mesin-manage-body"><tr><td colspan="4" class="empty-row">Memuat...</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- MATRIX VIEW -->
+    <section id="matrix-view" class="view">
+      <section class="panel table-panel">
+        <div class="table-title-row"><h2 class="table-title">Competency Matrix — Karyawan × Mesin</h2></div>
+        <div class="table-scroll">
+          <table id="matrix-table"><thead id="matrix-table-head"></thead><tbody id="matrix-table-body"></tbody></table>
+        </div>
+      </section>
+    </section>
+
+    <!-- HISTORY VIEW -->
+    <section id="history-view" class="view">
+      <div class="content-grid" style="margin-bottom:20px">
+        <section class="panel"><h2 class="panel-heading">Distribusi Grade</h2><div style="padding:20px"><canvas id="chart-distribution" height="220"></canvas></div></section>
+        <section class="panel"><h2 class="panel-heading">Statistik per Grade</h2><div style="padding:20px"><canvas id="chart-trend" height="220"></canvas></div></section>
+      </div>
+      <section class="panel table-panel">
+        <div class="table-title-row"><h2 class="table-title">Riwayat Penilaian (Sheet Raport)</h2></div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Waktu</th><th>NIK</th><th>Nama</th><th>Area</th><th>Mesin</th><th>Skor</th><th>Grade</th><th>Bukti</th><th>Assessor</th><th data-admin-only>Aksi</th></tr></thead>
+            <tbody id="history-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- KRITERIA VIEW -->
+    <section id="kriteria-view" class="view">
+      <section class="panel filter-bar">
+        <div class="filter-group"><label class="filter-label">Pilih Area</label><select id="kriteria-area-filter" class="field" onchange="loadKriteriaAdmin()"><option value="">— Pilih Area —</option></select></div>
+        <button class="btn" onclick="openKriteriaModal()" id="btn-tambah-kriteria" disabled style="margin-bottom:0" data-admin-only>+ Tambah Item</button>
+      </section>
+      <section class="panel table-panel">
+        <div class="table-title-row">
+          <h2 class="table-title">Item Penilaian</h2>
+          <div style="font-size:12px;color:#64748b" id="kriteria-info">Pilih area terlebih dahulu</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>No</th><th>Grade</th><th>Kategori</th><th>Item Penilaian</th><th style="text-align:right" data-admin-only>Aksi</th></tr></thead>
+            <tbody id="kriteria-body"><tr><td colspan="5" class="empty-row">Pilih area di atas untuk melihat item penilaian</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- AUDIT VIEW -->
+    <section id="audit-view" class="view">
+      <section class="panel filter-bar">
+        <div class="filter-group"><label class="filter-label">🔍 Cari User / Aksi / Detail</label><input id="audit-search" class="field" type="search" placeholder="Ketik untuk filter..." oninput="renderAuditLog()"></div>
+        <div class="filter-group" style="flex:0 0 220px">
+          <label class="filter-label">Filter Kategori</label>
+          <select id="audit-filter-kategori" class="field" onchange="renderAuditLog()">
+            <option value="">Semua Kategori</option>
+            <option value="PERSONEL">👥 Personel</option>
+            <option value="KRITERIA">📝 Kriteria</option>
+            <option value="MESIN_AREA">⚙️ Mesin / Area</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary" onclick="loadAuditLog()">🔄 Refresh</button>
+      </section>
+      <section class="panel table-panel">
+        <div class="table-title-row">
+          <h2 class="table-title">Audit Trail — Perubahan Data</h2>
+          <div style="font-size:12px;color:#64748b" id="audit-info">Memuat...</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Waktu</th><th>User</th><th>Username</th><th>Aksi</th><th>Kategori</th><th>Detail</th></tr></thead>
+            <tbody id="audit-body"><tr><td colspan="6" class="empty-row">Klik 🔄 Refresh untuk memuat data</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- USER VIEW -->
+    <section id="user-view" class="view">
+      <section class="panel table-panel">
+        <div class="table-title-row">
+          <h2 class="table-title">User Login</h2>
+          <button class="btn" onclick="openUserModal()">+ Tambah User</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Nama</th><th>Username</th><th>Posisi</th></tr></thead>
+            <tbody id="user-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <footer class="dashboard-footer">Grading Operator by TSUP Dankos Farma · <em>Never stop learning.</em></footer>
+  </main>
+</div>
+
+<!-- MODAL: INPUT NILAI -->
+<div id="form-modal" class="modal-backdrop">
+  <div class="modal" style="width:min(1000px,100%);max-height:92vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+      <div>
+        <h3 style="margin:0 0 4px;font-size:19px">FORMULIR PENILAIAN OPERATOR PRODUKSI</h3>
+        <p style="margin:0;color:#64748b;font-size:13px" id="form-subtitle">Pilih karyawan & mesin untuk memulai penilaian</p>
+      </div>
+      <button onclick="closeModal('form-modal')" style="background:#f1f5f9;border:0;width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:16px;color:#64748b">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
+      <div style="background:#f8fafc;border:1px solid #e7edf5;border-radius:12px;padding:16px">
+        <label style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">ORGANIZATION NAME</label>
+        <select id="form-organization" class="field" style="margin:6px 0 12px" onchange="onOrganizationChange()">
+          <option value="">— Semua Organization —</option>
+        </select>
+        <label style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">NAMA KARYAWAN</label>
+        <select id="form-employee" class="field" style="margin:6px 0 12px" onchange="onEmployeeChange()"><option value="">— Pilih Karyawan —</option></select>
+        <label style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">NIK</label>
+        <input id="form-nik" class="field" style="margin:6px 0 12px;background:#f1f5f9" readonly>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">TANGGAL MASUK</label><input id="form-tgl-masuk" class="field" style="margin:6px 0 0;background:#f1f5f9" readonly></div>
+          <div><label style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">JABATAN</label><input id="form-jabatan" class="field" style="margin:6px 0 0;background:#f1f5f9" readonly></div>
+        </div>
+      </div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:16px">
+        <label style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">NAMA ASSESSOR</label>
+        <input id="form-assessor" class="field" style="margin:6px 0 12px;background:#fff" readonly>
+        <label style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">POSISI</label>
+        <input id="form-assessor-jabatan" class="field" style="margin:6px 0 12px;background:#fff" readonly>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">AREA</label><select id="form-area" class="field" style="margin:6px 0 0" onchange="onAreaChange()"><option value="">— Pilih Area —</option></select></div>
+          <div><label style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">MESIN</label><select id="form-mesin" class="field" style="margin:6px 0 0" onchange="onMesinChange()"><option value="">— Pilih Mesin —</option></select></div>
+        </div>
+      </div>
+    </div>
+    <div id="form-kriteria-wrapper" style="display:none">
+      <div id="form-grade-sections"></div>
+      <div class="grade-summary-final" style="margin-top:18px;padding:20px;border-radius:14px;background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid #e7edf5;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+        <div><div style="font-size:11px;color:#64748b;font-weight:700;letter-spacing:.05em">GRADE FINAL</div><div style="font-size:13px;color:#64748b;margin-top:4px" id="form-progress-text">Grade tertinggi yang lulus 100%</div></div>
+        <div id="form-grade-final-box" style="text-align:center;padding:14px 26px;border-radius:12px;border:2px solid #e7edf5;background:#fff;min-width:150px">
+          <div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:.05em">HASIL</div>
+          <div id="form-grade-final-letter" style="font-size:40px;font-weight:700;line-height:1;margin:4px 0;color:#64748b">-</div>
+          <div id="form-grade-final-name" style="font-size:11px;font-weight:600;color:#64748b">Belum dinilai</div>
+        </div>
+      </div>
+    </div>
+    <div id="form-kriteria-empty" style="display:none;margin-top:16px;padding:30px;text-align:center;background:#f8fafc;border-radius:12px;color:#64748b;font-size:13px">
+      ⚠️ Belum ada kriteria untuk <strong>Area + Mesin</strong> ini.<br>Tambahkan dulu di menu Form Kriteria.
+    </div>
+    <div id="form-bukti-wrapper" style="margin-top:18px;padding:16px;border:1px dashed #bfdbfe;background:#f8fbff;border-radius:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em">LAMPIRAN BUKTI PENILAIAN</div>
+          <div style="font-size:12px;color:#64748b;margin-top:4px">Upload foto sebagai bukti proses/hasil penilaian. Maksimal 1 foto.</div>
+        </div>
+        <label for="form-bukti-foto" class="btn btn-secondary" style="margin:0;cursor:pointer">📷 Pilih Foto</label>
+      </div>
+      <input id="form-bukti-foto" type="file" accept="image/*" capture="environment" style="display:none" onchange="pilihBuktiFoto(event)">
+      <div id="form-bukti-preview" style="display:none;margin-top:12px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <img id="form-bukti-image" alt="Preview bukti penilaian" style="width:110px;height:80px;object-fit:cover;border-radius:10px;border:1px solid #dbe5f0;background:#fff">
+          <div style="flex:1;min-width:180px">
+            <div id="form-bukti-name" style="font-size:12px;font-weight:700;color:#334155;word-break:break-word"></div>
+            <div id="form-bukti-size" style="font-size:11px;color:#64748b;margin-top:3px"></div>
+          </div>
+          <button type="button" class="btn btn-secondary" onclick="hapusBuktiFoto()" style="margin:0">Hapus</button>
+        </div>
+      </div>
+      <div id="form-bukti-status" style="font-size:11px;color:#64748b;margin-top:10px"></div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:22px">
+      <button class="btn btn-secondary" onclick="closeModal('form-modal')">Batal</button>
+      <button class="btn btn-secondary" onclick="resetProgressive()" id="form-btn-reset" style="display:none">↻ Reset</button>
+      <button class="btn" id="form-btn-simpan" onclick="simpanForm()" disabled>Simpan Penilaian</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: KRITERIA -->
+<div id="kriteria-modal" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="kriteria-modal-title">Tambah Item Penilaian</h3>
+    <input type="hidden" id="k-edit-mode" value="">
+    <input type="hidden" id="k-row-index" value="">
+    <label>Area</label><input id="k-area-display" class="field" style="background:#f1f5f9" readonly>
+    <label>Grade</label>
+    <select id="k-grade">
+      <option value="A">A — Operator baru</option>
+      <option value="B">B — Start dan stop mesin</option>
+      <option value="C">C — Identifikasi masalah dan solusi</option>
+      <option value="D">D — Trainer</option>
+    </select>
+    <label>Kategori</label><input id="k-kategori" placeholder="K atau -">
+    <label>Item Penilaian</label>
+    <textarea id="k-item" placeholder="Deskripsi item penilaian..."></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('kriteria-modal')">Batal</button>
+      <button class="btn" onclick="saveKriteria()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PERSONEL -->
+<div id="personel-modal" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="personel-modal-title">Tambah Personel</h3>
+    <input type="hidden" id="p-edit-mode" value="">
+    <label>Employee ID</label><input id="p-id" placeholder="EMP001">
+    <label>Employee Name</label><input id="p-nama" placeholder="Nama lengkap">
+    <label>Job Title Name</label><input id="p-jabatan" placeholder="Operator Granulasi">
+    <label>Job Level Name</label><input id="p-level" placeholder="Operator">
+
+    <label>Organization Name</label>
+    <select id="p-org" class="field">
+      <option value="">— Pilih Organization —</option>
+    </select>
+    <button type="button" class="btn-add-line" onclick="tambahLineBaru()">
+      ➕ Tambah Line Baru
+    </button>
+
+    <label>Gender</label><select id="p-gender"><option value="">-</option><option>Male</option><option>Female</option></select>
+    <label>Start Date</label><input id="p-start" type="date">
+    <label>Status</label><select id="p-status"><option>Aktif</option><option>Non Aktif</option></select>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('personel-modal')">Batal</button>
+      <button class="btn" onclick="savePersonel()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: USER -->
+<div id="user-modal" class="modal-backdrop">
+  <div class="modal">
+    <h3>Tambah User Login</h3>
+    <label>Nama Lengkap</label><input id="u-nama" placeholder="Nama">
+    <label>Username</label><input id="u-username" placeholder="username">
+    <label>Password</label><input id="u-password" type="password" placeholder="password">
+    <label>Posisi</label>
+    <select id="u-posisi">
+      <option>Admin</option>
+      <option>Assessor</option>
+      <option>Guest</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('user-modal')">Batal</button>
+      <button class="btn" onclick="saveUser()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AREA -->
+<div id="area-modal" class="modal-backdrop">
+  <div class="modal">
+    <h3>Tambah Area Baru</h3>
+    <p style="font-size:13px;color:#64748b;margin:0 0 12px">Area baru akan otomatis membuat sheet <code>Form [NamaArea]</code>.</p>
+    <label>Nama Area</label>
+    <input id="a-nama" placeholder="Contoh: Packaging, QC, Warehouse...">
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('area-modal')">Batal</button>
+      <button class="btn" onclick="saveArea()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: MESIN -->
+<div id="mesin-modal" class="modal-backdrop">
+  <div class="modal">
+    <h3>Tambah Mesin Baru</h3>
+    <label>Pilih Area</label>
+    <select id="m-area"><option value="">— Pilih Area —</option></select>
+    <label>Nama Mesin</label>
+    <input id="m-nama" placeholder="Contoh: Mesin Filling 2">
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('mesin-modal')">Batal</button>
+      <button class="btn" onclick="saveMesin()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbz1ATPLeS2hCk7tUg6AhkETJ7R4OkE1bFT72s5eWzBMmzZyAxt9oCgusHoowakyoeJoHQ/exec";
+const BATAS_HARI_PERLU_DINILAI = 90;
+
+/* ============================================================
+   ✅ SECURITY CONFIG
+   ============================================================ */
+const MAX_LOGIN_ATTEMPTS = 5;               // Maksimal salah password
+const LOCK_DURATION_MS   = 15 * 60 * 1000;  // Kunci 15 menit setelah 5x salah
+const AUTO_LOGOUT_MS     = 30 * 60 * 1000;  // Auto logout setelah 30 menit idle
+
+/* ============================================================
+   ✅ MASTER ORGANIZATION (selalu muncul di dropdown)
+   ============================================================ */
+const MASTER_ORGANIZATIONS = [
+  "Production Line 01",
+  "Production Line 02",
+  "Production Line 03",
+  "Production Line 04",
+  "Production Line 05",
+  "Production Line 06",
+  "Production Line 07",
+  "Production Line 08",
+  "Production Line 09"
+];
+
+const GRADE_LEVELS = { A: "Operator baru", B: "Start dan stop mesin", C: "Identifikasi masalah dan solusi", D: "Trainer" };
+const GRADE_COLORS = { A: "#f59e0b", B: "#3b82f6", C: "#22c55e", D: "#8b5cf6" };
+
+let currentUser = null;
+let allData = { personel: [], report: [], mesin: {} };
+let areaList = [];
+let mesinList = [];
+let auditLogCache = [];
+let charts = {};
+let kriteriaAktif = [];
+let checkedKriteria = new Set();
+let catatanKriteria = {};
+let tanggalKriteria = {};
+let gradeTerbuka = ["A"];
+let gradeLulus = new Set();
+let top10Chart = null;
+let top10DetailGrade = "A";
+let detailOperatorNIK = null;
+let currentRaportNIK = null;
+let _lastHash = "";
+let kriteriaAdminList = [];
+let currentKriteriaArea = "";
+
+/* ========== SECURITY STATE ========== */
+let autoLogoutTimer = null;
+let _lockCountdownInterval = null;
+
+/* ========== ROLE HELPERS ========== */
+function isGuest() { return currentUser && currentUser.role === "guest"; }
+function isAdminUser() { return currentUser && currentUser.role === "admin"; }
+function blockGuest() {
+  if (isGuest()) { toast("Guest hanya bisa melihat data", true); return true; }
+  return false;
+}
+
+function toast(msg, err, type) {
+  const el = document.createElement("div");
+  el.className = "toast" + (err ? " error" : (type === "info" ? " info" : ""));
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2800);
+}
+function escapeHtml(v) { return String(v || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c])); }
+function gradeClass(g) { return "grade-" + String(g || "A").toLowerCase(); }
+function safeParseJSON(str) { try { return JSON.parse(str); } catch(e) { return []; } }
+function getUserTag() { return currentUser ? { user: currentUser.nama, username: currentUser.username } : { user: "unknown", username: "unknown" }; }
+
+/* ========== HELPER: Title Case ========== */
+function toTitleCase(str) {
+  return String(str || "").trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
+/* ============================================================
+   ✅ SECURITY: Batas 5x salah password
+   ============================================================ */
+function getLoginAttempts(username) {
+  try {
+    const data = JSON.parse(localStorage.getItem("loginAttempts") || "{}");
+    return data[username] || { count: 0, lockedUntil: 0 };
+  } catch (e) { return { count: 0, lockedUntil: 0 }; }
+}
+
+function saveLoginAttempts(username, info) {
+  try {
+    const data = JSON.parse(localStorage.getItem("loginAttempts") || "{}");
+    data[username] = info;
+    localStorage.setItem("loginAttempts", JSON.stringify(data));
+  } catch (e) {}
+}
+
+function resetLoginAttempts(username) {
+  try {
+    const data = JSON.parse(localStorage.getItem("loginAttempts") || "{}");
+    delete data[username];
+    localStorage.setItem("loginAttempts", JSON.stringify(data));
+  } catch (e) {}
+}
+
+function formatSisaWaktu(ms) {
+  if (ms <= 0) return "0 detik";
+  const total = Math.ceil(ms / 1000);
+  const menit = Math.floor(total / 60);
+  const detik = total % 60;
+  if (menit > 0) return `${menit} menit ${detik} detik`;
+  return `${detik} detik`;
+}
+
+function tampilkanLockInfo(sisaMs, attempts) {
+  const el = document.getElementById("lock-info");
+  const errEl = document.getElementById("login-error");
+  if (!el) return;
+  if (sisaMs > 0) {
+    el.classList.add("show");
+    el.innerHTML = `🔒 <strong>Akun terkunci sementara</strong><br>
+      Terlalu banyak percobaan gagal (${attempts}/${MAX_LOGIN_ATTEMPTS}).<br>
+      Coba lagi dalam <strong id="lock-countdown">${formatSisaWaktu(sisaMs)}</strong>`;
+    if (errEl) errEl.textContent = "";
+    mulaiCountdownLock(sisaMs);
+  } else {
+    el.classList.remove("show");
+    if (_lockCountdownInterval) { clearInterval(_lockCountdownInterval); _lockCountdownInterval = null; }
+  }
+}
+
+function mulaiCountdownLock(sisaMs) {
+  if (_lockCountdownInterval) clearInterval(_lockCountdownInterval);
+  const lockEnd = Date.now() + sisaMs;
+  _lockCountdownInterval = setInterval(() => {
+    const sisa = lockEnd - Date.now();
+    if (sisa <= 0) {
+      clearInterval(_lockCountdownInterval);
+      _lockCountdownInterval = null;
+      const el = document.getElementById("lock-info");
+      if (el) el.classList.remove("show");
+      return;
+    }
+    const countdown = document.getElementById("lock-countdown");
+    if (countdown) countdown.textContent = formatSisaWaktu(sisa);
+  }, 1000);
+}
+
+/* ============================================================
+   ✅ AUTO LOGOUT setelah 30 menit tidak ada aktivitas
+   ============================================================ */
+function startAutoLogout() {
+  stopAutoLogout();
+  autoLogoutTimer = setTimeout(() => {
+    if (currentUser) {
+      toast("Sesi berakhir karena tidak ada aktivitas selama 30 menit", true);
+      setTimeout(() => {
+        sessionStorage.removeItem("user");
+        location.reload();
+      }, 1500);
+    }
+  }, AUTO_LOGOUT_MS);
+}
+
+function stopAutoLogout() {
+  if (autoLogoutTimer) {
+    clearTimeout(autoLogoutTimer);
+    autoLogoutTimer = null;
+  }
+}
+
+function resetAutoLogout() {
+  if (currentUser) startAutoLogout();
+}
+
+/* Pasang listener aktivitas user */
+["mousedown", "mousemove", "keydown", "scroll", "touchstart", "click"].forEach(evt => {
+  document.addEventListener(evt, resetAutoLogout, { passive: true });
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && currentUser) resetAutoLogout();
+});
+
+/* ============================================================
+   ✅ CUSTOM LINES (localStorage)
+   ============================================================ */
+function ambilCustomLines() {
+  try { return JSON.parse(localStorage.getItem("customLines") || "[]"); }
+  catch (e) { return []; }
+}
+
+function simpanCustomLines(list) {
+  localStorage.setItem("customLines", JSON.stringify(list));
+}
+
+function tambahLineBaru() {
+  if (blockGuest()) return;
+  const input = prompt(
+    "Masukkan nama Line / Organization baru:\n\nContoh: Production Line 10",
+    "Production Line "
+  );
+  if (input === null) return;
+  const nama = toTitleCase(input.trim());
+  if (!nama) return toast("Nama line tidak boleh kosong", true);
+  const map = buildOrganizationMap();
+  if (map.has(nama.toLowerCase())) {
+    toast("Line tersebut sudah ada di daftar", true);
+    return;
+  }
+  const customLines = ambilCustomLines();
+  customLines.push(nama);
+  simpanCustomLines(customLines);
+  toast(`✓ Line "${nama}" berhasil ditambahkan`);
+  isiOrganizationDropdownPersonel(nama);
+  isiFilterOrganizationPersonel();
+  isiOrganizationFilter(nama);
+}
+
+function ambilSemuaLine() {
+  const map = new Map();
+  MASTER_ORGANIZATIONS.forEach(raw => {
+    const display = toTitleCase(raw);
+    if (display) map.set(display.toLowerCase(), display);
+  });
+  ambilCustomLines().forEach(raw => {
+    const display = toTitleCase(raw);
+    if (display && !map.has(display.toLowerCase())) {
+      map.set(display.toLowerCase(), display);
+    }
+  });
+  allData.personel.forEach(p => {
+    const raw = String(p["Organization Name"] || "").trim();
+    if (!raw) return;
+    const display = toTitleCase(raw);
+    if (display && !map.has(display.toLowerCase())) {
+      map.set(display.toLowerCase(), display);
+    }
+  });
+  return [...map.values()].sort((a, b) =>
+    a.localeCompare(b, "id", { sensitivity: "base", numeric: true })
+  );
+}
+
+function buildOrganizationMap() {
+  const map = new Map();
+  ambilSemuaLine().forEach(display => {
+    map.set(display.toLowerCase(), { display, count: 0 });
+  });
+  allData.personel.forEach(p => {
+    const raw = String(p["Organization Name"] || "").trim();
+    if (!raw) return;
+    const display = toTitleCase(raw);
+    const key = display.toLowerCase();
+    if (!map.has(key)) map.set(key, { display, count: 0 });
+    map.get(key).count++;
+  });
+  return map;
+}
+
+function sortOrganizations(list) {
+  return list.sort((a, b) => a.localeCompare(b, "id", { sensitivity: "base", numeric: true }));
+}
+
+function hitungSkorDariDetail(r) {
+  const skorRaw = Number(r["Skor (%)"]) || 0;
+  if (skorRaw > 0) return skorRaw;
+  if (!r["Detail Kriteria"]) return 0;
+  try {
+    const detail = typeof r["Detail Kriteria"] === "string" ? JSON.parse(r["Detail Kriteria"]) : r["Detail Kriteria"];
+    if (!detail || !detail.length) return 0;
+    const total = detail.length;
+    const lulus = detail.filter(d => d.terpenuhi).length;
+    return total > 0 ? Math.round(lulus / total * 100) : 0;
+  } catch(e) { return 0; }
+}
+function hitungSkorRaport(r) {
+  const { pct, jumlah } = hitungPersenPerGrade(r);
+  const gradesAktif = ["A","B","C","D"].filter(g => jumlah[g] > 0);
+  if (!gradesAktif.length) return 0;
+  return Math.round(gradesAktif.reduce((sum, g) => sum + pct[g], 0) / gradesAktif.length);
+}
+function hitungPersenPerGrade(r) {
+  const pct = { A: 0, B: 0, C: 0, D: 0 };
+  const jumlah = { A: 0, B: 0, C: 0, D: 0 };
+  if (!r["Detail Kriteria"]) return { pct, jumlah };
+  const detail = safeParseJSON(r["Detail Kriteria"] || "[]");
+  const pg = { A:{t:0,l:0}, B:{t:0,l:0}, C:{t:0,l:0}, D:{t:0,l:0} };
+  detail.forEach(d => {
+    const g = String(d.grade || "A").toUpperCase();
+    if (!pg[g]) return;
+    pg[g].t++;
+    if (d.terpenuhi) pg[g].l++;
+  });
+  ["A","B","C","D"].forEach(g => {
+    pct[g] = pg[g].t > 0 ? Math.round(pg[g].l / pg[g].t * 100) : 0;
+    jumlah[g] = pg[g].t;
+  });
+  return { pct, jumlah };
+}
+
+function parseTimestamp(ts) {
+  if (!ts) return null;
+  const s = String(ts).trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+  if (m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(+m[1], +m[2]-1, +m[3]);
+  m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (m) return new Date(+m[3], +m[2]-1, +m[1]);
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) return d;
+  return null;
+}
+
+function hitungReminder() {
+  const lastByNIK = {};
+  allData.report.forEach(r => {
+    const nik = String(r["NIK"] || "").trim();
+    if (!nik) return;
+    const ts = r["Timestamp"];
+    const d = parseTimestamp(ts);
+    if (!d) return;
+    if (!lastByNIK[nik] || d.getTime() > lastByNIK[nik].date.getTime()) {
+      lastByNIK[nik] = { date: d, timestamp: ts };
+    }
+  });
+  const list = [];
+  allData.personel.forEach(p => {
+    const status = p["Status"] || "Aktif";
+    if (status === "Non Aktif") return;
+    const nik  = String(p["Employee ID"] || "").trim();
+    const nama = p["Employee Name"] || "(tanpa nama)";
+    if (!nik) return;
+    const last = lastByNIK[nik];
+    if (!last) { list.push({ nik, nama, hari: null, terakhir: null }); return; }
+    const diffHari = Math.floor((Date.now() - last.date.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffHari >= BATAS_HARI_PERLU_DINILAI) list.push({ nik, nama, hari: diffHari, terakhir: last.date });
+  });
+  list.sort((a, b) => {
+    if (a.hari === null && b.hari === null) return a.nama.localeCompare(b.nama);
+    if (a.hari === null) return -1;
+    if (b.hari === null) return 1;
+    return b.hari - a.hari;
+  });
+  return list;
+}
+
+function toggleReminder(event) {
+  if (event) event.stopPropagation();
+  const banner = document.getElementById("reminder-banner");
+  if (!banner) return;
+  const minimized = banner.classList.toggle("minimized");
+  localStorage.setItem("reminderMinimized", minimized ? "1" : "0");
+  updateReminderMinimizeButton();
+}
+function updateReminderMinimizeButton() {
+  const banner = document.getElementById("reminder-banner");
+  const button = document.getElementById("reminder-minimize");
+  if (!banner || !button) return;
+  const minimized = banner.classList.contains("minimized");
+  button.textContent = minimized ? "↗" : "−";
+  button.title = minimized ? "Buka reminder" : "Minimize reminder";
+  button.setAttribute("aria-label", button.title);
+}
+function restoreReminderState() {
+  const banner = document.getElementById("reminder-banner");
+  if (!banner) return;
+  if (localStorage.getItem("reminderMinimized") === "1") banner.classList.add("minimized");
+  else banner.classList.remove("minimized");
+  updateReminderMinimizeButton();
+}
+document.addEventListener("click", function(event) {
+  const banner = document.getElementById("reminder-banner");
+  if (!banner || !banner.classList.contains("minimized")) return;
+  if (banner.contains(event.target)) {
+    banner.classList.remove("minimized");
+    localStorage.setItem("reminderMinimized", "0");
+    updateReminderMinimizeButton();
+  }
+});
+function renderReminderBanner() {
+  const banner = document.getElementById("reminder-banner");
+  const title = document.getElementById("reminder-title");
+  const subtitle = document.getElementById("reminder-subtitle");
+  const chips = document.getElementById("reminder-chips");
+  if (!banner) return;
+  const list = hitungReminder();
+  if (!list.length) {
+    banner.classList.remove("show", "warn", "danger");
+    chips.innerHTML = "";
+    return;
+  }
+  const adaDanger = list.some(item => item.hari === null || item.hari >= 180);
+  banner.classList.remove("show", "warn", "danger");
+  banner.classList.add("show", adaDanger ? "danger" : "warn");
+  restoreReminderState();
+  title.innerHTML = `⚠️ ${list.length} operator perlu dinilai ulang: segera lakukan penilaian`;
+  const jmlBelum = list.filter(i => i.hari === null).length;
+  let sub = `Batas penilaian ulang: setiap ${BATAS_HARI_PERLU_DINILAI} hari (${Math.round(BATAS_HARI_PERLU_DINILAI/30)} bulan)`;
+  if (jmlBelum > 0) sub += ` · ${jmlBelum} orang belum pernah dinilai`;
+  subtitle.textContent = sub;
+  chips.innerHTML = list.map(item => {
+    const label = item.hari === null ? "Belum pernah dinilai" : `${item.hari} hari lalu`;
+    const isGuestUser = isGuest();
+    const onclickAttr = isGuestUser ? "" : `onclick="bukaFormUntukOperator('${escapeHtml(item.nik)}')"`;
+    const titleAttr = isGuestUser ? "Guest tidak bisa input nilai" : `Klik untuk input nilai — ${item.nama}`;
+    return `<button type="button" class="reminder-chip" ${onclickAttr} title="${titleAttr}">
+      👤 ${escapeHtml(item.nama)}
+      <span class="days">· ${label}</span>
+    </button>`;
+  }).join("");
+}
+function bukaFormUntukOperator(nik) {
+  if (blockGuest()) return;
+  if (!currentUser) return;
+  openFormModal();
+  const empSel = document.getElementById("form-employee");
+  empSel.value = nik;
+  onEmployeeChange();
+  const modalBox = document.querySelector("#form-modal .modal");
+  if (modalBox) modalBox.scrollTop = 0;
+  toast(`Silakan pilih Area & Mesin untuk ${escapeHtml(nik)}`, false, "info");
+}
+restoreReminderState();
+
+/* ========== LOGIN ========== */
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("login-btn");
+  const err = document.getElementById("login-error");
+  const username = document.getElementById("login-username").value.trim();
+
+  // Cek apakah user sedang terkunci
+  const attempts = getLoginAttempts(username);
+  if (attempts.lockedUntil > Date.now()) {
+    tampilkanLockInfo(attempts.lockedUntil - Date.now(), attempts.count);
+    return;
+  } else if (attempts.lockedUntil > 0) {
+    // Lock kadaluarsa → reset
+    resetLoginAttempts(username);
+    tampilkanLockInfo(0, 0);
+  }
+
+  err.textContent = "";
+  btn.disabled = true; btn.textContent = "Memproses...";
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "login", username, password: document.getElementById("login-password").value })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      // ==== LOGIN GAGAL ====
+      const current = getLoginAttempts(username);
+      const newCount = current.count + 1;
+      if (newCount >= MAX_LOGIN_ATTEMPTS) {
+        const lockUntil = Date.now() + LOCK_DURATION_MS;
+        saveLoginAttempts(username, { count: newCount, lockedUntil: lockUntil });
+        tampilkanLockInfo(LOCK_DURATION_MS, newCount);
+      } else {
+        saveLoginAttempts(username, { count: newCount, lockedUntil: 0 });
+        const sisaPercobaan = MAX_LOGIN_ATTEMPTS - newCount;
+        err.textContent = `${data.message || "Login gagal"} — sisa ${sisaPercobaan} percobaan`;
+      }
+      btn.disabled = false; btn.textContent = "Masuk";
+      return;
+    }
+
+    // ==== LOGIN BERHASIL ====
+    resetLoginAttempts(username);
+    tampilkanLockInfo(0, 0);
+    currentUser = data.user;
+    if (currentUser.role) currentUser.role = String(currentUser.role).toLowerCase();
+    if (!currentUser.role && currentUser.posisi) {
+      const p = String(currentUser.posisi).toLowerCase();
+      currentUser.role = p === "admin" ? "admin" : (p === "guest" ? "guest" : "assessor");
+    }
+    sessionStorage.setItem("user", JSON.stringify(currentUser));
+    masukDashboard();
+  } catch (error) {
+    console.error(error);
+    err.textContent = "Gagal terhubung ke server";
+    btn.disabled = false; btn.textContent = "Masuk";
+  }
+});
+
+function masukSebagaiGuest() {
+  currentUser = { nama: "Guest", username: "guest", posisi: "Guest", role: "guest" };
+  sessionStorage.setItem("user", JSON.stringify(currentUser));
+  masukDashboard();
+}
+function masukDashboard() {
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("dashboard-shell").style.display = "flex";
+  const roleLabel = currentUser.role === "admin" ? "Admin" : (currentUser.role === "guest" ? "Guest" : "Assessor");
+  document.getElementById("profile-chip").textContent = `👤 ${currentUser.nama} (${roleLabel})`;
+  applyPermissions();
+  muatSemuaData();
+  startAutoLogout();   // ← aktifkan auto logout
+}
+function applyPermissions() {
+  const role = currentUser ? currentUser.role : "";
+  const isAdmin = role === "admin";
+  const isGuestUser = role === "guest";
+  document.querySelectorAll("[data-admin-only]").forEach(el => el.style.display = isAdmin ? "" : "none");
+  if (isGuestUser) {
+    document.querySelectorAll("[data-write-action]").forEach(el => el.style.display = "none");
+    document.body.classList.add("guest-mode");
+  } else {
+    document.body.classList.remove("guest-mode");
+  }
+}
+async function logout() {
+  stopAutoLogout();   // ← matikan auto logout
+  const tag = getUserTag();
+  try { await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "logout", data: tag }) }); } catch(e) {}
+  sessionStorage.removeItem("user");
+  location.reload();
+}
+
+/* ========== LOAD DATA ========== */
+async function muatSemuaData() {
+  try {
+    const [resAll, resArea] = await Promise.all([fetch(API_URL + "?action=getAll"), fetch(API_URL + "?action=getMasterArea")]);
+    const data = await resAll.json();
+    const dataArea = await resArea.json();
+    if (!data.ok) throw new Error(data.message);
+    allData.personel = data.personel || [];
+    allData.report = data.report || [];
+    allData.mesin = data.mesin || {};
+    allData.totalMesin = data.totalMesin || 0;
+    areaList = (dataArea.area || []);
+    mesinList = [];
+    Object.entries(allData.mesin).forEach(([area, arr]) => arr.forEach(m => mesinList.push({ area, mesin: m })));
+    isiFilterArea();
+    isiFilterGrafikAlat();
+    isiFilterOrganizationPersonel();
+    isiAreaDropdown();
+    renderAll();
+    renderTop10();
+    renderGrafikAlat();
+    renderReminderBanner();
+    if (detailOperatorNIK) renderDetailOperator();
+    _lastHash = hashData();
+  } catch (e) { console.error(e); toast("Gagal memuat data: " + e.message, true); }
+}
+function hashData() { return JSON.stringify({ p: allData.personel.length, r: allData.report.length, m: Object.keys(allData.mesin).length }); }
+
+function isiFilterArea() {
+  const areas = Object.keys(allData.mesin || {});
+  const selR = document.getElementById("raport-area-filter");
+  if (selR) selR.innerHTML = '<option value="">Semua Area</option>' + areas.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
+  isiMesinRaportFilter();
+}
+function isiFilterGrafikAlat() {
+  const selA = document.getElementById("alat-filter-area");
+  if (!selA) return;
+  const areas = Object.keys(allData.mesin || {});
+  selA.innerHTML = '<option value="">Semua Area</option>' + areas.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
+}
+
+/* ========== DROPDOWN ORGANIZATION ========== */
+function isiFilterOrganizationPersonel() {
+  const sel = document.getElementById("personel-organization-filter");
+  if (!sel) return;
+  const currentValue = sel.value || "";
+  const map = buildOrganizationMap();
+  const list = sortOrganizations([...map.values()].map(v => v.display));
+  sel.innerHTML =
+    '<option value="">Semua Organization</option>' +
+    list.map(org => {
+      const cnt = map.get(org.toLowerCase()).count;
+      const label = cnt > 0 ? `🏭 ${org} (${cnt} orang)` : `🏭 ${org}`;
+      return `<option value="${escapeHtml(org)}">${label}</option>`;
+    }).join("");
+  if (currentValue) {
+    const match = list.find(o => o.toLowerCase() === currentValue.toLowerCase());
+    if (match) sel.value = match;
+  }
+}
+
+function isiOrganizationDropdownPersonel(selectedValue = "") {
+  const sel = document.getElementById("p-org");
+  if (!sel) return;
+  const map = buildOrganizationMap();
+  const list = sortOrganizations([...map.values()].map(v => v.display));
+  sel.innerHTML =
+    '<option value="">— Pilih Organization —</option>' +
+    list.map(o => {
+      const cnt = map.get(o.toLowerCase()).count;
+      const label = cnt > 0 ? `🏭 ${o} (${cnt} orang)` : `🏭 ${o}`;
+      return `<option value="${escapeHtml(o)}">${label}</option>`;
+    }).join("");
+  if (selectedValue) {
+    const normalized = toTitleCase(selectedValue).toLowerCase();
+    const match = list.find(o => o.toLowerCase() === normalized);
+    sel.value = match || "";
+  } else {
+    sel.value = "";
+  }
+}
+
+function getOrgPersonelValue() {
+  const sel = document.getElementById("p-org");
+  return sel ? toTitleCase(sel.value) : "";
+}
+
+function isiOrganizationFilter(selectedValue = "") {
+  const orgSel = document.getElementById("form-organization");
+  if (!orgSel) return;
+  const map = buildOrganizationMap();
+  const list = sortOrganizations([...map.values()].map(v => v.display));
+  orgSel.innerHTML = '<option value="">— Semua Organization —</option>' +
+    list.map(org => {
+      const cnt = map.get(org.toLowerCase()).count;
+      const label = cnt > 0 ? `🏭 ${org} (${cnt} orang)` : `🏭 ${org}`;
+      return `<option value="${escapeHtml(org)}">${label}</option>`;
+    }).join("");
+  if (selectedValue) {
+    const normalized = toTitleCase(selectedValue).toLowerCase();
+    const match = list.find(o => o.toLowerCase() === normalized);
+    orgSel.value = match || "";
+  } else {
+    orgSel.value = "";
+  }
+}
+
+function isiMesinRaportFilter() {
+  const area = document.getElementById("raport-area-filter").value;
+  const sel = document.getElementById("raport-mesin-filter");
+  let listMesin = [];
+  if (area && allData.mesin[area]) listMesin = allData.mesin[area];
+  else Object.values(allData.mesin).forEach(arr => arr.forEach(m => { if (!listMesin.includes(m)) listMesin.push(m); }));
+  sel.innerHTML = '<option value="">Semua Mesin</option>' + listMesin.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("");
+}
+function isiAreaDropdown() {
+  const selK = document.getElementById("kriteria-area-filter");
+  if (selK) selK.innerHTML = '<option value="">— Pilih Area —</option>' + areaList.map(a => `<option value="${escapeHtml(a.area)}">${escapeHtml(a.area)}</option>`).join("");
+  const selM = document.getElementById("m-area");
+  if (selM) selM.innerHTML = '<option value="">— Pilih Area —</option>' + areaList.map(a => `<option value="${escapeHtml(a.area)}">${escapeHtml(a.area)}</option>`).join("");
+  const selF = document.getElementById("form-area");
+  if (selF) selF.innerHTML = '<option value="">— Pilih Area —</option>' + Object.keys(allData.mesin).map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
+}
+
+/* ========== RENDER ALL ========== */
+function renderAll() {
+  const rows = allData.report;
+  renderKpi(rows);
+  renderDistribusi(rows);
+  renderOverview(rows);
+  renderEmployee();
+  renderMachine(rows);
+  renderMatrix(rows);
+  if (document.getElementById("history-view").classList.contains("active")) renderHistory(rows);
+  renderTop10();
+  renderUser();
+  if (detailOperatorNIK) renderDetailOperator();
+  renderGrafikAlat();
+  renderReminderBanner();
+}
+
+function renderKpi(rows) {
+  const gradeOrder = { "A": 1, "B": 2, "C": 3, "D": 4 };
+  document.getElementById("kpi-employee-value").textContent = allData.personel.length;
+  const mapPenilaian = {};
+  rows.forEach(r => {
+    const nik = String(r["NIK"] || "").trim();
+    const area = String(r["Area"] || "").trim() || "-";
+    const mesin = String(r["Mesin"] || "").trim();
+    const gf = String(r["Grade Final"] || "").toUpperCase();
+    if (!nik || !mesin || !gradeOrder[gf]) return;
+    const key = nik + "||" + area + "||" + mesin;
+    if (!mapPenilaian[key] || gradeOrder[gf] > gradeOrder[mapPenilaian[key]]) mapPenilaian[key] = gf;
+  });
+  const entries = Object.values(mapPenilaian);
+  document.getElementById("kpi-dinilai-value").textContent = entries.length;
+  const dist = { A: 0, B: 0, C: 0, D: 0 };
+  entries.forEach(g => { if (dist.hasOwnProperty(g)) dist[g]++; });
+  document.getElementById("kpi-grade-a-value").textContent = dist.A;
+  document.getElementById("kpi-grade-b-value").textContent = dist.B;
+  document.getElementById("kpi-grade-c-value").textContent = dist.C;
+  document.getElementById("kpi-grade-d-value").textContent = dist.D;
+  let totalMesin = Number(allData.totalMesin) || 0;
+  if (!totalMesin) {
+    const setMesin = new Set();
+    Object.values(allData.mesin || {}).forEach(arr => {
+      (arr || []).forEach(m => { const nama = String(m || "").trim(); if (nama) setMesin.add(nama); });
+    });
+    totalMesin = setMesin.size;
+  }
+  document.getElementById("kpi-machine-value").textContent = totalMesin;
+}
+
+function renderDistribusi(rows) {
+  const gradeOrder = { "A": 1, "B": 2, "C": 3, "D": 4 };
+  const mapPenilaian = {};
+  rows.forEach(r => {
+    const nik = String(r["NIK"] || "").trim();
+    const area = String(r["Area"] || "").trim() || "-";
+    const mesin = String(r["Mesin"] || "").trim();
+    const gf = String(r["Grade Final"] || "").toUpperCase();
+    if (!nik || !mesin || !gradeOrder[gf]) return;
+    const key = nik + "||" + area + "||" + mesin;
+    if (!mapPenilaian[key] || gradeOrder[gf] > gradeOrder[mapPenilaian[key]]) mapPenilaian[key] = gf;
+  });
+  const dist = { A: 0, B: 0, C: 0, D: 0 };
+  Object.values(mapPenilaian).forEach(g => { if (dist.hasOwnProperty(g)) dist[g]++; });
+  const total = Object.values(dist).reduce((a, b) => a + b, 0) || 1;
+  ["A","B","C","D"].forEach(g => {
+    const p = Math.round(dist[g] / total * 100);
+    document.getElementById("bar-" + g.toLowerCase()).style.width = p + "%";
+    document.getElementById("pct-" + g.toLowerCase()).textContent = p + "%";
+  });
+}
+
+function renderOverview(rows) {
+  const gradeOrder = { "A": 1, "B": 2, "C": 3, "D": 4 };
+  const byKey = {};
+  rows.forEach(r => {
+    const nik = String(r["NIK"] || "").trim();
+    if (!nik) return;
+    const area = r["Area"] || "Lainnya";
+    const mesin = r["Mesin"] || "-";
+    const gf = String(r["Grade Final"] || "").toUpperCase();
+    if (!gf || gf === "-" || !gradeOrder[gf]) return;
+    const key = nik + "||" + area + "||" + mesin;
+    if (!byKey[key]) byKey[key] = { area, mesin, gradeTertinggi: gf, nik };
+    else if (gradeOrder[gf] > gradeOrder[byKey[key].gradeTertinggi]) byKey[key].gradeTertinggi = gf;
+  });
+  const groups = {};
+  Object.values(byKey).forEach(item => {
+    const { area, mesin, gradeTertinggi } = item;
+    if (!groups[area]) groups[area] = {};
+    if (!groups[area][mesin]) groups[area][mesin] = { A:0, B:0, C:0, D:0 };
+    groups[area][mesin][gradeTertinggi]++;
+  });
+  const html = Object.entries(groups).map(([area, mesins]) => `
+    <div class="process-group">
+      <div class="process-title"><strong>${escapeHtml(area)}</strong><span>${Object.keys(mesins).length} mesin</span></div>
+      <div class="machine-grid">${Object.entries(mesins).map(([m, c]) => `
+        <article class="machine-card">
+          <div class="machine-name">${escapeHtml(m)}</div>
+          <div class="machine-meta">${escapeHtml(area)}</div>
+          <div class="machine-grade-grid">
+            <div class="machine-grade">A<strong>${c.A}</strong></div>
+            <div class="machine-grade">B<strong>${c.B}</strong></div>
+            <div class="machine-grade">C<strong>${c.C}</strong></div>
+            <div class="machine-grade">D<strong>${c.D}</strong></div>
+          </div>
+        </article>`).join("")}</div>
+    </div>`).join("");
+  document.getElementById("machine-overview").innerHTML = html || '<div class="empty-row" style="padding:20px">Belum ada data penilaian.</div>';
+}
+
+function renderEmployee() {
+  const tb = document.getElementById("employee-table-body");
+  if (!tb) return;
+  const q = (document.getElementById("personel-search")?.value || "").toLowerCase();
+  const sf = (document.getElementById("personel-status-filter")?.value || "");
+  const of = (document.getElementById("personel-organization-filter")?.value || "");
+  const isAdmin = isAdminUser();
+  const isGuestUser = isGuest();
+  let list = allData.personel.slice();
+  if (q) list = list.filter(p => `${p["Employee ID"]||""} ${p["Employee Name"]||""} ${p["Job Title Name"]||""} ${p["Organization Name"]||""}`.toLowerCase().includes(q));
+  if (sf) list = list.filter(p => (p["Status"] || "Aktif") === sf);
+  if (of) {
+    const ofNorm = toTitleCase(of).toLowerCase();
+    list = list.filter(p => toTitleCase(p["Organization Name"] || "").toLowerCase() === ofNorm);
+  }
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="10" class="empty-row">Tidak ada data personel.</td></tr>'; return; }
+  tb.innerHTML = list.map((p, i) => {
+    const status = p["Status"] || "Aktif";
+    const isNonAktif = status === "Non Aktif";
+    const id = String(p["Employee ID"] || "");
+    const aksiCol = isGuestUser ? "" : `<td style="white-space:nowrap">
+        <button class="btn btn-sm" onclick="bukaRaport('${escapeHtml(id)}')" style="background:#0891b2">📘 Raport</button>
+        ${isAdmin ? `
+          <button class="btn btn-sm" onclick="editPersonel('${escapeHtml(id)}')" style="background:#eef2f7;color:#334155">Edit</button>
+          ${isNonAktif
+            ? `<button class="btn btn-sm" onclick="setStatus('${escapeHtml(id)}','Aktif')" style="background:#16a34a">Aktifkan</button>`
+            : `<button class="btn btn-sm" onclick="setStatus('${escapeHtml(id)}','Non Aktif')" style="background:#f59e0b">Non Aktifkan</button>`
+          }
+          <button class="btn btn-sm btn-danger" onclick="deletePersonel('${escapeHtml(id)}')">Hapus</button>
+        ` : ""}
+      </td>`;
+    return `
+    <tr style="${isNonAktif ? 'opacity:.6' : ''}">
+      <td>${i+1}</td>
+      <td>${escapeHtml(p["Employee ID"])}</td>
+      <td class="employee-name">${escapeHtml(p["Employee Name"])}</td>
+      <td>${escapeHtml(p["Job Level Name"])}</td>
+      <td>${escapeHtml(p["Organization Name"])}</td>
+      <td>${escapeHtml(p["Job Title Name"])}</td>
+      <td>${escapeHtml(p["Gender"])}</td>
+      <td>${escapeHtml(p["Start Date"])}</td>
+      <td><span class="status-pill ${isNonAktif?'status-nonaktif':'status-aktif'}">${escapeHtml(status)}</span></td>
+      ${isGuestUser ? "" : aksiCol}
+    </tr>`;
+  }).join("");
+}
+
+function renderUser() {
+  const tb = document.getElementById("user-body");
+  if (!tb) return;
+  tb.innerHTML = '<tr><td colspan="3" class="empty-row">Data user ada di sheet <strong>User Login</strong>. Klik "+ Tambah User" untuk menambah.</td></tr>';
+}
+
+function renderMachine(rows) {
+  const gradeOrder = { "A": 1, "B": 2, "C": 3, "D": 4 };
+  const byKey = {};
+  rows.forEach(r => {
+    const nik = String(r["NIK"] || "").trim();
+    if (!nik) return;
+    const area = r["Area"] || "-";
+    const mesin = r["Mesin"] || "-";
+    const gf = String(r["Grade Final"] || "").toUpperCase();
+    if (!gf || gf === "-" || !gradeOrder[gf]) return;
+    const key = nik + "||" + area + "||" + mesin;
+    if (!byKey[key]) byKey[key] = { area, mesin, gradeTertinggi: gf, nik };
+    else if (gradeOrder[gf] > gradeOrder[byKey[key].gradeTertinggi]) byKey[key].gradeTertinggi = gf;
+  });
+  const groups = {};
+  Object.values(byKey).forEach(item => {
+    const key = item.area + "|" + item.mesin;
+    if (!groups[key]) groups[key] = { area: item.area, mesin: item.mesin, A:0, B:0, C:0, D:0, total:0 };
+    groups[key][item.gradeTertinggi]++;
+    groups[key].total++;
+  });
+  const tb = document.getElementById("machine-table-body");
+  const list = Object.values(groups);
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="8" class="empty-row">Belum ada data.</td></tr>'; return; }
+  tb.innerHTML = list.map((g, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td class="employee-name">${escapeHtml(g.mesin)}</td>
+      <td><span class="line-pill">${escapeHtml(g.area)}</span></td>
+      <td>${g.A}</td><td>${g.B}</td><td>${g.C}</td><td>${g.D}</td>
+      <td><span class="count-pill">${g.total} personel</span></td>
+    </tr>`).join("");
+}
+
+function renderMatrix(rows) {
+  const employees = [...new Set(rows.map(r => r["Nama"]))].sort();
+  const mesins = [...new Set(rows.map(r => r["Mesin"]))].sort();
+  const head = document.getElementById("matrix-table-head");
+  head.innerHTML = `<tr><th>Employee</th>${mesins.map(m => `<th>${escapeHtml(m)}</th>`).join("")}</tr>`;
+  const tb = document.getElementById("matrix-table-body");
+  if (!employees.length) { tb.innerHTML = `<tr><td colspan="${mesins.length+1}" class="empty-row">Belum ada data.</td></tr>`; return; }
+  tb.innerHTML = employees.map(emp => {
+    return `<tr><td class="employee-name">${escapeHtml(emp)}</td>${mesins.map(m => {
+      const rec = rows.find(r => r["Nama"] === emp && r["Mesin"] === m);
+      return rec ? `<td><span class="grade-badge ${gradeClass(rec["Grade Final"])}">${escapeHtml(rec["Grade Final"])}</span></td>` : "<td>-</td>";
+    }).join("")}</tr>`;
+  }).join("");
+}
+
+function renderHistory(rows) {
+  const tb = document.getElementById("history-table-body");
+  const isAdmin = isAdminUser();
+  if (!rows.length) { tb.innerHTML = `<tr><td colspan="${isAdmin?10:9}" class="empty-row">Belum ada riwayat.</td></tr>`; return; }
+  tb.innerHTML = rows.slice(0, 200).map(r => {
+    const skor = hitungSkorRaport(r);
+    return `
+    <tr>
+      <td>${escapeHtml(r["Timestamp"])}</td>
+      <td>${escapeHtml(r["NIK"])}</td>
+      <td class="employee-name">${escapeHtml(r["Nama"])}</td>
+      <td>${escapeHtml(r["Area"])}</td>
+      <td>${escapeHtml(r["Mesin"])}</td>
+      <td>${skor}%</td>
+      <td><span class="grade-badge ${gradeClass(r["Grade Final"])}">${escapeHtml(r["Grade Final"])}</span></td>
+      <td>${(r["Bukti Foto URL"] || r["buktiFotoUrl"]) ? `<a href="${escapeHtml(r["Bukti Foto URL"] || r["buktiFotoUrl"])}" target="_blank" rel="noopener" class="btn btn-sm" style="background:#eff6ff;color:#2563eb;text-decoration:none">📷 Lihat</a>` : '<span style="color:#94a3b8">-</span>'}</td>
+      <td>${escapeHtml(r["Assessor"])}</td>
+      ${isAdmin ? `<td><button class="btn btn-sm btn-danger" onclick="hapusReport('${escapeHtml(r["Timestamp"])}')">Hapus</button></td>` : ""}
+    </tr>`;
+  }).join("");
+  renderCharts(rows);
+}
+
+function renderCharts(rows) {
+  const gradeOrder = { "A": 1, "B": 2, "C": 3, "D": 4 };
+  const mapPenilaian = {};
+  rows.forEach(r => {
+    const nik = String(r["NIK"] || "").trim();
+    const area = String(r["Area"] || "").trim() || "-";
+    const mesin = String(r["Mesin"] || "").trim();
+    const gf = String(r["Grade Final"] || "").toUpperCase();
+    if (!nik || !mesin || !gradeOrder[gf]) return;
+    const key = nik + "||" + area + "||" + mesin;
+    if (!mapPenilaian[key] || gradeOrder[gf] > gradeOrder[mapPenilaian[key]]) mapPenilaian[key] = gf;
+  });
+  const dist = { A: 0, B: 0, C: 0, D: 0 };
+  Object.values(mapPenilaian).forEach(g => { if (dist.hasOwnProperty(g)) dist[g]++; });
+  const total = Object.values(dist).reduce((a, b) => a + b, 0) || 1;
+  const pct = {
+    A: Math.round(dist.A / total * 100),
+    B: Math.round(dist.B / total * 100),
+    C: Math.round(dist.C / total * 100),
+    D: Math.round(dist.D / total * 100)
+  };
+  if (charts.dist) charts.dist.destroy();
+  const c1 = document.getElementById("chart-distribution");
+  if (c1) charts.dist = new Chart(c1, {
+    type: "doughnut",
+    data: {
+      labels: [`Grade A · ${pct.A}% (${dist.A})`, `Grade B · ${pct.B}% (${dist.B})`, `Grade C · ${pct.C}% (${dist.C})`, `Grade D · ${pct.D}% (${dist.D})`],
+      datasets: [{ data: [dist.A, dist.B, dist.C, dist.D], backgroundColor: ["#f59e0b", "#3b82f6", "#22c55e", "#8b5cf6"], borderWidth: 2, borderColor: "#fff" }]
+    },
+    options: { responsive: true, cutout: "60%", plugins: { legend: { position: "bottom", labels: { font: { family: "Work Sans", size: 12, weight: "600" }, padding: 12, usePointStyle: true, pointStyle: "circle" } }, tooltip: { backgroundColor: "#172033", padding: 12, cornerRadius: 8, callbacks: { label: (ctx) => `  ${ctx.label}` } } } }
+  });
+  if (charts.trend) charts.trend.destroy();
+  const c2 = document.getElementById("chart-trend");
+  if (c2) charts.trend = new Chart(c2, {
+    type: "bar",
+    data: { labels: ["Grade A", "Grade B", "Grade C", "Grade D"], datasets: [{ label: "Jumlah Kombinasi (NIK × Mesin)", data: [dist.A, dist.B, dist.C, dist.D], backgroundColor: ["#f59e0b", "#3b82f6", "#22c55e", "#8b5cf6"], borderRadius: 8, barThickness: 60 }] },
+    options: { responsive: true, plugins: { legend: { display: false }, tooltip: { backgroundColor: "#172033", padding: 12, cornerRadius: 8, callbacks: { label: (ctx) => `  ${ctx.parsed.y} kombinasi (${Math.round(ctx.parsed.y / total * 100)}%)` } } }, scales: { y: { beginAtZero: true, grid: { color: "#eef2f7" }, ticks: { precision: 0, font: { family: "Work Sans", size: 11 } } }, x: { grid: { display: false }, ticks: { font: { family: "Work Sans", size: 12, weight: "600" } } } } }
+  });
+}
+
+function renderGrafikAlat() {
+  const container = document.getElementById("grafik-alat-content");
+  if (!container) return;
+  const filterArea = document.getElementById("alat-filter-area")?.value || "";
+  const filterGrade = document.getElementById("alat-filter-grade")?.value || "";
+  let reports = allData.report.slice();
+  if (filterGrade) reports = reports.filter(r => r["Grade Final"] === filterGrade);
+  if (filterArea) reports = reports.filter(r => r["Area"] === filterArea);
+  const byMesin = {};
+  reports.forEach(r => {
+    const mesin = r["Mesin"] || "-";
+    const area = r["Area"] || "-";
+    const nik = String(r["NIK"] || "").trim();
+    const gf = String(r["Grade Final"] || "").toUpperCase();
+    if (!nik || !["A","B","C","D"].includes(gf)) return;
+    if (!byMesin[mesin]) byMesin[mesin] = { mesin, area, niks: new Set() };
+    byMesin[mesin].niks.add(nik + "||" + area);
+  });
+  const list = Object.values(byMesin).map(m => ({ mesin: m.mesin, area: m.area, jumlah: m.niks.size })).sort((a, b) => b.jumlah - a.jumlah).slice(0, 5);
+  if (!list.length) { container.innerHTML = `<div class="empty-row" style="text-align:center;padding:40px;color:#64748b">Belum ada data penilaian untuk filter ini</div>`; return; }
+  const maxJumlah = list[0].jumlah || 1;
+  const barColors = [
+    { grad: "linear-gradient(90deg,#fbbf24,#f59e0b)", solid: "#f59e0b" },
+    { grad: "linear-gradient(90deg,#60a5fa,#3b82f6)", solid: "#3b82f6" },
+    { grad: "linear-gradient(90deg,#4ade80,#22c55e)", solid: "#22c55e" },
+    { grad: "linear-gradient(90deg,#a78bfa,#8b5cf6)", solid: "#8b5cf6" },
+    { grad: "linear-gradient(90deg,#f472b6,#ec4899)", solid: "#ec4899" }
+  ];
+  container.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px">' + list.map((item, i) => {
+    const pctVal = Math.round(item.jumlah / maxJumlah * 100);
+    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "#" + (i+1);
+    const bc = barColors[i] || barColors[4];
+    return `
+      <div style="display:grid;grid-template-columns:48px 1fr auto;gap:16px;align-items:center;padding:16px 18px;border:1px solid #e7edf5;border-radius:14px;background:#fff">
+        <div style="width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:18px;color:#fff;background:${bc.grad}">${medal}</div>
+        <div style="min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:18px">⚙️</span><span style="font-weight:700;font-size:16px;color:#172033">${escapeHtml(item.mesin)}</span></div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#64748b;font-weight:600;background:#f1f5f9;padding:3px 10px;border-radius:20px">📍 ${escapeHtml(item.area)}</span>
+            <div style="flex:1;min-width:100px;height:8px;background:#eef2f7;border-radius:999px;overflow:hidden"><div style="height:100%;width:${pctVal}%;background:${bc.grad};border-radius:999px"></div></div>
+          </div>
+        </div>
+        <div style="text-align:right;white-space:nowrap"><div style="font-size:26px;font-weight:700;color:${bc.solid};line-height:1.1">${item.jumlah}</div><div style="font-size:10px;color:#64748b;font-weight:700;letter-spacing:.05em">PERSONEL</div></div>
+      </div>`;
+  }).join("") + '</div>';
+  const setPenilaian = new Set();
+  reports.forEach(r => {
+    const n = String(r["NIK"]||"").trim();
+    const a = String(r["Area"]||"").trim() || "-";
+    const m = String(r["Mesin"]||"").trim();
+    const g = String(r["Grade Final"]||"").toUpperCase();
+    if (n && m && ["A","B","C","D"].includes(g)) setPenilaian.add(n + "||" + a + "||" + m);
+  });
+  const totalMesin = Object.keys(byMesin).length;
+  const totalPersonel = setPenilaian.size;
+  container.innerHTML += `
+    <div style="margin-top:16px;padding:14px 18px;background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid #e7edf5;border-radius:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px;color:#475569">
+      <span>📊 Total: <strong>${totalMesin}</strong> mesin · <strong>${totalPersonel}</strong> personel dinilai</span>
+      <span>💡 <strong>${escapeHtml(list[0].mesin)}</strong> paling banyak dikuasai (${list[0].jumlah} personel)</span>
+    </div>`;
+}
+
+function getTop10ForGrade(grade) {
+  const gradeOrder = { "A": 1, "B": 2, "C": 3, "D": 4 };
+  const mapPenilaian = {};
+  allData.report.forEach(r => {
+    const nik = String(r["NIK"] || "").trim();
+    const area = String(r["Area"] || "").trim() || "-";
+    const mesin = String(r["Mesin"] || "").trim();
+    const gf = String(r["Grade Final"] || "").toUpperCase();
+    if (!nik || !mesin || !gradeOrder[gf]) return;
+    const key = nik + "||" + area + "||" + mesin;
+    const skor = hitungSkorRaport(r);
+    if (!mapPenilaian[key] || gradeOrder[gf] > gradeOrder[mapPenilaian[key].grade]) {
+      mapPenilaian[key] = { nik, nama: r["Nama"]||"-", jabatan: r["Jabatan"]||"-", line: r["Line"]||"-", area, mesin, skor, grade: gf };
+    } else if (gradeOrder[gf] === gradeOrder[mapPenilaian[key].grade] && skor > mapPenilaian[key].skor) {
+      mapPenilaian[key].skor = skor;
+    }
+  });
+  return Object.values(mapPenilaian).filter(i => i.grade === grade).sort((a, b) => b.skor - a.skor).slice(0, 10);
+}
+
+function renderTop10() {
+  const canvas = document.getElementById("chart-top10");
+  if (!canvas) return;
+  const grades = ["A", "B", "C", "D"];
+  const dataPerGrade = {};
+  grades.forEach(g => dataPerGrade[g] = getTop10ForGrade(g));
+  const labels = Array.from({length: 10}, (_, i) => `#${i+1}`);
+  const datasets = grades.map(g => {
+    const list = dataPerGrade[g];
+    const data = labels.map((_, i) => list[i] ? list[i].skor : null);
+    return { label: `Grade ${g}`, data, borderColor: GRADE_COLORS[g], backgroundColor: GRADE_COLORS[g] + "20", borderWidth: 3, tension: 0.35, pointBackgroundColor: GRADE_COLORS[g], pointBorderColor: "#fff", pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 8, fill: false, spanGaps: true };
+  });
+  if (top10Chart) top10Chart.destroy();
+  top10Chart = new Chart(canvas, {
+    type: "line", data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { position: "top", labels: { font: { family: "Work Sans", size: 12, weight: "600" }, usePointStyle: true, pointStyle: "circle", padding: 16 } },
+        tooltip: { backgroundColor: "#172033", padding: 12, cornerRadius: 8,
+          callbacks: {
+            title: (items) => `Peringkat ${items[0].label}`,
+            label: (ctx) => {
+              const grade = ctx.dataset.label.replace("Grade ", "");
+              const item = dataPerGrade[grade][ctx.dataIndex];
+              if (!item) return `${ctx.dataset.label}: -`;
+              return [`${ctx.dataset.label}: ${item.skor}%`, `  👤 ${item.nama}`, `  ⚙️ ${item.mesin} (${item.area})`];
+            }
+          }
+        }
+      },
+      scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: "Skor (%)" }, grid: { color: "#eef2f7" }, ticks: { callback: (v) => v + "%" } }, x: { title: { display: true, text: "Peringkat (1 = tertinggi)" }, grid: { display: false } } }
+    }
+  });
+  renderTop10Detail(dataPerGrade);
+}
+
+function renderTop10Detail(dataPerGrade) {
+  const container = document.getElementById("top10-detail");
+  if (!container) return;
+  const grades = ["A", "B", "C", "D"];
+  const list = dataPerGrade[top10DetailGrade] || [];
+  container.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      ${grades.map(g => `<button onclick="switchTop10Detail('${g}')" style="padding:8px 16px;border:2px solid ${g === top10DetailGrade ? GRADE_COLORS[g] : '#e7edf5'};border-radius:10px;background:${g === top10DetailGrade ? GRADE_COLORS[g] + '15' : '#fff'};color:${g === top10DetailGrade ? GRADE_COLORS[g] : '#64748b'};font-weight:700;cursor:pointer;font-family:inherit;font-size:12px">Grade ${g} <span style="opacity:.7">(${dataPerGrade[g].length})</span></button>`).join("")}
+    </div>
+    ${list.length === 0 
+      ? `<div style="text-align:center;padding:30px;color:#64748b;font-size:13px;background:#f8fafc;border-radius:12px">Belum ada operator dengan Grade ${top10DetailGrade}</div>`
+      : `<div style="display:flex;flex-direction:column;gap:6px">
+          ${list.map((item, i) => {
+            const rankCls = i === 0 ? "r1" : i === 1 ? "r2" : i === 2 ? "r3" : "rn";
+            const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i+1);
+            const color = GRADE_COLORS[top10DetailGrade];
+            return `<div style="display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:10px 14px;border:1px solid #e7edf5;border-radius:10px;background:#fff">
+                <div class="top10-rank ${rankCls}">${medal}</div>
+                <div style="min-width:0">
+                  <div style="font-weight:700;font-size:13px;color:#172033;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(item.nama)}</div>
+                  <div style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(item.jabatan)} · ${escapeHtml(item.line)} · ⚙️ ${escapeHtml(item.mesin)}</div>
+                </div>
+                <div style="text-align:right"><div style="font-size:16px;font-weight:700;color:${color};line-height:1.1">${item.skor}%</div></div>
+              </div>`;
+          }).join("")}
+        </div>`}`;
+}
+function switchTop10Detail(grade) {
+  top10DetailGrade = grade;
+  const grades = ["A", "B", "C", "D"];
+  const dataPerGrade = {};
+  grades.forEach(g => dataPerGrade[g] = getTop10ForGrade(g));
+  renderTop10Detail(dataPerGrade);
+}
+
+function cariOperatorDetail() {
+  const q = (document.getElementById("detail-op-search").value || "").toLowerCase().trim();
+  const suggest = document.getElementById("detail-op-suggest");
+  if (!q) { suggest.innerHTML = ""; return; }
+  const matches = allData.personel.filter(p => `${p["Employee Name"]} ${p["Employee ID"]}`.toLowerCase().includes(q)).slice(0, 5);
+  if (!matches.length) { suggest.innerHTML = ""; return; }
+  suggest.innerHTML = `<div>${matches.map(p => `<div onclick="pilihOperatorDetail('${escapeHtml(p["Employee ID"])}')" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f1f5f9"><div style="font-weight:600;font-size:13px">${escapeHtml(p["Employee Name"])}</div><div style="font-size:11px;color:#64748b">NIK: ${escapeHtml(p["Employee ID"])} · ${escapeHtml(p["Job Title Name"]||"-")}</div></div>`).join("")}</div>`;
+}
+function pilihOperatorDetail(nik) {
+  detailOperatorNIK = nik;
+  const emp = allData.personel.find(p => String(p["Employee ID"]) === String(nik));
+  if (emp) document.getElementById("detail-op-search").value = emp["Employee Name"];
+  document.getElementById("detail-op-suggest").innerHTML = "";
+  renderDetailOperator();
+}
+
+function renderDetailOperator() {
+  const container = document.getElementById("detail-operator-content");
+  if (!container) return;
+  if (!detailOperatorNIK) { container.innerHTML = `<div class="empty-row" style="text-align:center;padding:40px;color:#64748b">Ketik nama atau NIK operator di atas untuk melihat detail kompetensi</div>`; return; }
+  const emp = allData.personel.find(p => String(p["Employee ID"]) === String(detailOperatorNIK));
+  if (!emp) { container.innerHTML = `<div class="empty-row">Operator tidak ditemukan</div>`; return; }
+  const riwayat = allData.report.filter(r => String(r["NIK"] || "").trim() === String(detailOperatorNIK).trim());
+  const perMesin = {};
+  riwayat.forEach(r => {
+    const key = (r["Area"] || "-") + "|" + (r["Mesin"] || "-");
+    if (!perMesin[key]) perMesin[key] = r;
+    else if (String(r["Timestamp"]) > String(perMesin[key]["Timestamp"])) perMesin[key] = r;
+  });
+  const mesinList = Object.values(perMesin);
+  const inisial = emp["Employee Name"].split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
+  const gradeStats = { A: { lulus: 0, total: 0 }, B: { lulus: 0, total: 0 }, C: { lulus: 0, total: 0 }, D: { lulus: 0, total: 0 } };
+  mesinList.forEach(r => {
+    const detailRaw = r["Detail Kriteria"] || "";
+    let parsed = [];
+    try { parsed = typeof detailRaw === "string" ? JSON.parse(detailRaw) : detailRaw; } catch(e) { parsed = []; }
+    if (parsed && parsed.length > 0) {
+      parsed.forEach(d => {
+        const g = String(d.grade || "A").toUpperCase();
+        if (!gradeStats[g]) return;
+        gradeStats[g].total++;
+        if (d.terpenuhi) gradeStats[g].lulus++;
+      });
+    } else {
+      const totalItem = Number(r["Total Item"]) || 0;
+      const itemLulus = Number(r["Item Lulus"]) || 0;
+      const g = String(r["Grade Dinilai"] || "A").toUpperCase();
+      if (gradeStats[g]) { gradeStats[g].total += totalItem; gradeStats[g].lulus += itemLulus; }
+    }
+  });
+  const gradeColors = { A: "#f59e0b", B: "#3b82f6", C: "#22c55e", D: "#8b5cf6" };
+  const gradeLabels = { A: "Operator baru", B: "Start & stop mesin", C: "Problem & solusi", D: "Trainer" };
+  const progressHTML = ["A","B","C","D"].map(g => {
+    const s = gradeStats[g];
+    const pct = s.total > 0 ? Math.round(s.lulus / s.total * 100) : 0;
+    const color = gradeColors[g];
+    const empty = s.total === 0;
+    return `<div style="display:grid;grid-template-columns:90px 1fr 120px;gap:14px;align-items:center;padding:10px 0">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:32px;height:32px;border-radius:8px;background:${empty ? '#e2e8f0' : color};display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px">${g}</div>
+          <div style="font-size:11px;font-weight:700;color:#475569;line-height:1.2">Grade ${g}<br><span style="font-weight:500;color:#94a3b8;font-size:10px">${gradeLabels[g]}</span></div>
+        </div>
+        <div style="height:12px;background:#eef2f7;border-radius:999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${empty ? '#cbd5e1' : color};border-radius:999px;transition:width .6s"></div></div>
+        <div style="text-align:right"><div style="font-size:20px;font-weight:700;color:${empty ? '#94a3b8' : color};line-height:1.1">${pct}%</div><div style="font-size:10px;color:#94a3b8;font-weight:600">${s.lulus}/${s.total} item</div></div>
+      </div>`;
+  }).join("");
+  let gradeFinal = "-";
+  const orderDesc = ["D","C","B","A"];
+  for (const g of orderDesc) { const s = gradeStats[g]; if (s.total > 0 && s.lulus === s.total) { gradeFinal = g; break; } }
+  const gradeFinalColor = gradeFinal !== "-" ? gradeColors[gradeFinal] : "#94a3b8";
+  const totalPenilaian = mesinList.length;
+
+  let totalSkorMesin = 0, countMesin = 0;
+  mesinList.forEach(r => {
+    const { pct, jumlah } = hitungPersenPerGrade(r);
+    const gradesAktif = ["A","B","C","D"].filter(g => jumlah[g] > 0);
+    if (gradesAktif.length === 0) return;
+    const skorMesin = hitungSkorRaport(r);
+    totalSkorMesin += skorMesin;
+    countMesin++;
+  });
+  const rataSkor = countMesin > 0 ? Math.round(totalSkorMesin / countMesin) : 0;
+
+  container.innerHTML = `
+    <div class="detail-operator-header" style="align-items:flex-start">
+      <div class="detail-op-avatar">${inisial}</div>
+      <div class="detail-op-info"><h3>${escapeHtml(emp["Employee Name"])}</h3><p>NIK: <strong>${escapeHtml(emp["Employee ID"])}</strong> · ${escapeHtml(emp["Job Title Name"]||"-")} · ${escapeHtml(emp["Organization Name"]||"-")}</p></div>
+      <div class="detail-op-stats">
+        <div class="detail-stat"><div class="detail-stat-label">Total Mesin</div><div class="detail-stat-value">${totalPenilaian}</div></div>
+        <div class="detail-stat"><div class="detail-stat-label">Rata-rata Skor</div><div class="detail-stat-value">${rataSkor}%</div></div>
+        <div class="detail-stat"><div class="detail-stat-label">Grade Final</div><div class="detail-stat-value" style="color:${gradeFinalColor}">${gradeFinal}</div></div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #e7edf5;border-radius:14px;padding:20px 24px;margin-bottom:18px">
+      <div style="font-size:12px;font-weight:700;color:#64748b;letter-spacing:.05em;text-transform:uppercase;margin-bottom:14px">📊 Progress Kompetensi per Grade</div>
+      ${progressHTML}
+    </div>
+    ${mesinList.length === 0 
+      ? `<div class="empty-row" style="text-align:center;padding:40px;color:#64748b">Belum ada penilaian untuk operator ini</div>`
+      : `<div style="font-size:12px;font-weight:700;color:#64748b;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px">Mesin yang Dikuasai (${mesinList.length} unit)</div>
+        <div class="mesin-list">${mesinList.map(m => {
+          const gf = m["Grade Final"] || "-";
+          const skor = hitungSkorRaport(m);
+          return `<div class="mesin-item">
+              <div><div class="mesin-item-title">⚙️ ${escapeHtml(m["Mesin"])}</div><div class="mesin-item-meta">📍 Area: <strong>${escapeHtml(m["Area"])}</strong> · 📅 ${escapeHtml(String(m["Timestamp"]).slice(0,10))} · 👤 ${escapeHtml(m["Assessor"]||"-")}</div></div>
+              <div class="mesin-item-right"><span class="grade-badge ${gradeClass(gf)}" style="font-size:12px;padding:6px 14px">Grade ${gf}</span><div style="font-size:11px;color:#64748b;margin-top:6px;font-weight:600">${skor}%</div></div>
+            </div>`;
+        }).join("")}</div>`}`;
+}
+
+function cariKaryawanRaport() {
+  const q = (document.getElementById("raport-search").value || "").toLowerCase().trim();
+  const suggest = document.getElementById("raport-search-suggest");
+  if (!q) { suggest.innerHTML = ""; return; }
+  const matches = allData.personel.filter(p => `${p["Employee Name"]} ${p["Employee ID"]}`.toLowerCase().includes(q)).slice(0, 5);
+  if (!matches.length) { suggest.innerHTML = ""; return; }
+  suggest.innerHTML = `<div style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e7edf5;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:100;max-height:280px;overflow-y:auto;margin-top:4px">${matches.map(p => `<div onclick="pilihKaryawanRaport('${escapeHtml(p["Employee ID"])}')" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f1f5f9"><div style="font-weight:600;font-size:13px">${escapeHtml(p["Employee Name"])}</div><div style="font-size:11px;color:#64748b">NIK: ${escapeHtml(p["Employee ID"])} · ${escapeHtml(p["Job Title Name"]||"-")}</div></div>`).join("")}</div>`;
+}
+function pilihKaryawanRaport(nik) {
+  currentRaportNIK = nik;
+  const emp = allData.personel.find(p => String(p["Employee ID"]) === String(nik));
+  if (emp) document.getElementById("raport-search").value = emp["Employee Name"];
+  document.getElementById("raport-search-suggest").innerHTML = "";
+  renderRaport();
+}
+function bukaRaport(nik) {
+  currentRaportNIK = nik;
+  document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelector('.nav-item[data-view="raport"]').classList.add("active");
+  document.getElementById("raport-view").classList.add("active");
+  const emp = allData.personel.find(p => String(p["Employee ID"]) === String(nik));
+  if (emp) document.getElementById("raport-search").value = emp["Employee Name"];
+  renderRaport();
+}
+function renderRaport() {
+  const nik = currentRaportNIK;
+  const filterArea = document.getElementById("raport-area-filter").value;
+  const filterMesin = document.getElementById("raport-mesin-filter").value;
+  const header = document.getElementById("raport-header");
+  const content = document.getElementById("raport-content");
+  if (!nik) { header.innerHTML = ""; content.innerHTML = '<div class="empty-row" style="padding:60px;text-align:center;color:#64748b">Ketik nama atau NIK karyawan di atas untuk melihat raport</div>'; return; }
+  const emp = allData.personel.find(p => String(p["Employee ID"]) === String(nik));
+  if (!emp) { content.innerHTML = '<div class="empty-row">Karyawan tidak ditemukan</div>'; return; }
+  let raportData = allData.report.filter(r => String(r["NIK"] || "").trim() === String(nik).trim());
+  if (filterArea) raportData = raportData.filter(r => r["Area"] === filterArea);
+  if (filterMesin) raportData = raportData.filter(r => r["Mesin"] === filterMesin);
+  raportData.sort((a, b) => String(b["Timestamp"]).localeCompare(String(a["Timestamp"])));
+  const inisial = emp["Employee Name"].split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
+  const latestByMesin = {};
+  raportData.forEach(r => {
+    const key = r["Area"] + "|" + r["Mesin"];
+    if (!latestByMesin[key]) latestByMesin[key] = r;
+    else if (String(r["Timestamp"]) > String(latestByMesin[key]["Timestamp"])) latestByMesin[key] = r;
+  });
+  const latestList = Object.values(latestByMesin);
+  header.innerHTML = `<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <div style="width:64px;height:64px;background:#eff6ff;border-radius:16px;display:grid;place-items:center;font-size:22px;font-weight:700;color:#2563eb">${inisial}</div>
+      <div><h2 style="margin:0 0 4px;font-size:20px">${escapeHtml(emp["Employee Name"])}</h2><div style="font-size:13px;color:#64748b">NIK: <strong>${escapeHtml(emp["Employee ID"])}</strong> · ${escapeHtml(emp["Job Title Name"]||"-")} · ${escapeHtml(emp["Organization Name"]||"-")}</div></div>
+      <div style="margin-left:auto;display:flex;gap:20px;flex-wrap:wrap">
+        <div style="text-align:center"><div style="font-size:11px;color:#64748b;font-weight:700">TOTAL PENILAIAN</div><div style="font-size:24px;font-weight:700;color:#172033">${raportData.length}</div></div>
+      </div>
+    </div>`;
+  if (!raportData.length) { content.innerHTML = '<div class="empty-row" style="padding:40px;text-align:center;color:#64748b">Belum ada penilaian untuk filter ini</div>'; return; }
+  content.innerHTML = '<div class="raport-timeline">' + latestList.map(r => {
+    const gradeFinal = r["Grade Final"] || "-";
+    const { pct } = hitungPersenPerGrade(r);
+    const rataRata = hitungSkorRaport(r);
+    const grades = [
+      { letter: "A", label: GRADE_LEVELS["A"], pct: pct.A },
+      { letter: "B", label: GRADE_LEVELS["B"], pct: pct.B },
+      { letter: "C", label: GRADE_LEVELS["C"], pct: pct.C },
+      { letter: "D", label: GRADE_LEVELS["D"], pct: pct.D }
+    ];
+    return `<div class="raport-card">
+        <div class="raport-card-header">
+          <div><div class="raport-card-title"><span style="font-size:16px">⚙️</span> ${escapeHtml(r["Mesin"])}</div><div class="raport-card-meta">📍 ${escapeHtml(r["Area"])} · 📅 ${escapeHtml(String(r["Timestamp"]).slice(0,16))} · 👤 ${escapeHtml(r["Assessor"]||"-")}</div>
+            ${r["Bukti Foto URL"] || r["buktiFotoUrl"] ? `<div style="margin-top:8px"><a href="${escapeHtml(r["Bukti Foto URL"] || r["buktiFotoUrl"])}" target="_blank" rel="noopener" class="btn btn-sm" style="background:#eff6ff;color:#2563eb;text-decoration:none">📷 Lihat Bukti Foto</a></div>` : ""}</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:12px;color:#64748b;font-weight:600">Rata-rata: ${rataRata}%</span>
+            <span class="grade-badge ${gradeClass(gradeFinal)}">Grade ${gradeFinal}</span>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          ${grades.map(g => {
+            const isFull = g.pct === 100;
+            return `<div class="grade-progress-row">
+                <div class="grade-letter-box ${g.letter}">${g.letter}</div>
+                <div><div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:4px">${g.label}</div><div class="grade-progress-bar"><div class="grade-progress-fill ${isFull ? g.letter : 'empty'}" style="width:${g.pct}%"></div></div></div>
+                <div class="grade-progress-pct ${isFull ? 'full' : ''}">${g.pct}%</div>
+              </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }).join("") + '</div>';
+}
+
+/* ========== KRITERIA ADMIN ========== */
+async function loadKriteriaAdmin() {
+  const area = document.getElementById("kriteria-area-filter").value;
+  currentKriteriaArea = area;
+  const tb = document.getElementById("kriteria-body");
+  const info = document.getElementById("kriteria-info");
+  const btnTambah = document.getElementById("btn-tambah-kriteria");
+  if (!area) { tb.innerHTML = '<tr><td colspan="5" class="empty-row">Pilih area di atas untuk melihat item penilaian</td></tr>'; info.textContent = "Pilih area terlebih dahulu"; btnTambah.disabled = true; return; }
+  tb.innerHTML = '<tr><td colspan="5" class="empty-row">Memuat data...</td></tr>';
+  info.textContent = "Memuat...";
+  try {
+    const res = await fetch(API_URL + "?action=getAllKriteria&area=" + encodeURIComponent(area));
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message);
+    kriteriaAdminList = data.kriteria || [];
+    btnTambah.disabled = false;
+    info.textContent = `${kriteriaAdminList.length} item penilaian di area ${area}`;
+    if (!kriteriaAdminList.length) { tb.innerHTML = '<tr><td colspan="5" class="empty-row">Belum ada item. Klik "+ Tambah Item" untuk menambahkan.</td></tr>'; return; }
+    const canDelete = isAdminUser();
+    const showAksi = !isGuest();
+    tb.innerHTML = kriteriaAdminList.map((k, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td><span class="grade-badge ${gradeClass(k.grade)}">${k.grade}</span></td>
+        <td><span class="kat-badge kat-${k.kategori === '-' ? '-' : k.kategori}">${escapeHtml(k.kategori)}</span></td>
+        <td>${escapeHtml(k.item)}</td>
+        ${showAksi ? `<td style="text-align:right;white-space:nowrap">
+          <button class="btn btn-sm" onclick="editKriteria(${i})" style="background:#eef2f7;color:#334155">✏️ Edit</button>
+          ${canDelete ? `<button class="btn btn-sm btn-danger" onclick="hapusKriteria(${i})">🗑 Hapus</button>` : ""}
+        </td>` : ""}
+      </tr>`).join("");
+  } catch (e) { tb.innerHTML = `<tr><td colspan="5" class="empty-row">Error: ${escapeHtml(e.message)}</td></tr>`; }
+}
+function openKriteriaModal() {
+  if (blockGuest()) return;
+  if (!currentKriteriaArea) return toast("Pilih area dulu", true);
+  document.getElementById("kriteria-modal-title").textContent = "Tambah Item Penilaian";
+  document.getElementById("k-edit-mode").value = "";
+  document.getElementById("k-row-index").value = "";
+  document.getElementById("k-area-display").value = currentKriteriaArea;
+  document.getElementById("k-grade").value = "A";
+  document.getElementById("k-kategori").value = "K";
+  document.getElementById("k-item").value = "";
+  document.getElementById("kriteria-modal").classList.add("show");
+}
+function editKriteria(idx) {
+  if (blockGuest()) return;
+  const k = kriteriaAdminList[idx];
+  if (!k) return;
+  document.getElementById("kriteria-modal-title").textContent = "Edit Item Penilaian";
+  document.getElementById("k-edit-mode").value = "edit";
+  document.getElementById("k-row-index").value = k.rowIndex;
+  document.getElementById("k-area-display").value = k.area;
+  document.getElementById("k-grade").value = k.grade;
+  document.getElementById("k-kategori").value = k.kategori;
+  document.getElementById("k-item").value = k.item;
+  const modal = document.getElementById("kriteria-modal");
+  modal.dataset.oldGrade = k.grade;
+  modal.dataset.oldKategori = k.kategori;
+  modal.dataset.oldItem = k.item;
+  modal.classList.add("show");
+}
+async function saveKriteria() {
+  if (blockGuest()) return;
+  const editMode = document.getElementById("k-edit-mode").value;
+  const area = currentKriteriaArea;
+  const grade = document.getElementById("k-grade").value;
+  const kategori = document.getElementById("k-kategori").value.trim() || "-";
+  const item = document.getElementById("k-item").value.trim();
+  const rowIndex = document.getElementById("k-row-index").value;
+  if (!area || !grade || !item) return toast("Lengkapi data", true);
+  const tag = getUserTag();
+  try {
+    let payload;
+    if (editMode === "edit") {
+      const modal = document.getElementById("kriteria-modal");
+      payload = { action: "updateKriteria", data: { area, rowIndex: Number(rowIndex), grade, kategori, item, user: tag.user, username: tag.username, oldGrade: modal.dataset.oldGrade || "", oldKategori: modal.dataset.oldKategori || "", oldItem: modal.dataset.oldItem || "" } };
+    } else {
+      payload = { action: "addKriteria", data: { area, grade, kategori, item, user: tag.user, username: tag.username } };
+    }
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message);
+    toast(editMode === "edit" ? "✓ Item diupdate" : "✓ Item ditambahkan");
+    closeModal("kriteria-modal");
+    loadKriteriaAdmin();
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+async function hapusKriteria(idx) {
+  if (blockGuest()) return;
+  const k = kriteriaAdminList[idx];
+  if (!k) return;
+  if (!confirm(`YAKIN HAPUS?\n\nGrade ${k.grade} — ${k.item}\n\nTidak bisa dibatalkan.`)) return;
+  const tag = getUserTag();
+  try {
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "deleteKriteria", data: { area: k.area, rowIndex: k.rowIndex, user: tag.user, username: tag.username, grade: k.grade, kategori: k.kategori, item: k.item } })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message);
+    toast("✓ Item dihapus");
+    loadKriteriaAdmin();
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+
+/* ========== AUDIT TRAIL ========== */
+async function loadAuditLog() {
+  const tb = document.getElementById("audit-body");
+  tb.innerHTML = '<tr><td colspan="6" class="empty-row">Memuat log...</td></tr>';
+  try {
+    const res = await fetch(API_URL + "?action=getAuditLog&limit=200");
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message);
+    auditLogCache = data.log || [];
+    renderAuditLog();
+    document.getElementById("audit-info").textContent = `Total ${data.total || auditLogCache.length} aktivitas tercatat`;
+  } catch (e) { tb.innerHTML = `<tr><td colspan="6" class="empty-row">Error: ${escapeHtml(e.message)}</td></tr>`; }
+}
+function renderAuditLog() {
+  const tb = document.getElementById("audit-body");
+  const q = (document.getElementById("audit-search")?.value || "").toLowerCase();
+  const filterKategori = document.getElementById("audit-filter-kategori")?.value || "";
+  const AKSI_PERSONEL = ["TAMBAH_PERSONEL", "EDIT_PERSONEL", "HAPUS_PERSONEL", "SET_STATUS_PERSONEL"];
+  const AKSI_KRITERIA = ["TAMBAH_KRITERIA", "EDIT_KRITERIA", "HAPUS_KRITERIA"];
+  const AKSI_MESIN_AREA = ["TAMBAH_MESIN", "HAPUS_MESIN", "TAMBAH_AREA", "HAPUS_AREA"];
+  const SEMUA_AKSI_TAMPIL = [...AKSI_PERSONEL, ...AKSI_KRITERIA, ...AKSI_MESIN_AREA];
+  let list = auditLogCache.filter(l => SEMUA_AKSI_TAMPIL.includes(String(l["AKSI"] || "")));
+  if (filterKategori === "PERSONEL") list = list.filter(l => AKSI_PERSONEL.includes(String(l["AKSI"] || "")));
+  if (filterKategori === "KRITERIA") list = list.filter(l => AKSI_KRITERIA.includes(String(l["AKSI"] || "")));
+  if (filterKategori === "MESIN_AREA") list = list.filter(l => AKSI_MESIN_AREA.includes(String(l["AKSI"] || "")));
+  if (q) list = list.filter(l => `${l["USER"]||""} ${l["USERNAME"]||""} ${l["AKSI"]||""} ${l["DETAIL"]||""}`.toLowerCase().includes(q));
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="6" class="empty-row">Tidak ada log sesuai filter</td></tr>'; return; }
+  tb.innerHTML = list.map(l => {
+    const aksi = String(l["AKSI"] || "").toUpperCase();
+    let cls = "log-system";
+    if (aksi.startsWith("TAMBAH")) cls = "log-add";
+    else if (aksi.startsWith("EDIT") || aksi.startsWith("SET")) cls = "log-edit";
+    else if (aksi.startsWith("HAPUS")) cls = "log-delete";
+    return `<tr>
+      <td style="font-size:12px">${escapeHtml(l["TIMESTAMP"])}</td>
+      <td><strong>${escapeHtml(l["USER"])}</strong></td>
+      <td style="font-size:12px;color:#64748b">${escapeHtml(l["USERNAME"])}</td>
+      <td><span class="log-action-badge ${cls}">${escapeHtml(aksi)}</span></td>
+      <td style="font-size:11px;color:#64748b">${escapeHtml(l["KATEGORI"])}</td>
+      <td style="font-size:12px">${escapeHtml(l["DETAIL"])}</td>
+    </tr>`;
+  }).join("");
+}
+
+/* ========== MACHINE TAB ========== */
+function switchMachineTab(tab) {
+  const tabComp = document.getElementById("machine-tab-competency");
+  const tabMgmt = document.getElementById("machine-tab-manage");
+  const subComp = document.getElementById("machine-sub-competency");
+  const subMgmt = document.getElementById("machine-sub-manage");
+  if (tab === "competency") {
+    subComp.style.display = ""; subMgmt.style.display = "none";
+    tabComp.style.background = "#2563eb"; tabComp.style.color = "#fff";
+    tabMgmt.style.background = "#eef2f7"; tabMgmt.style.color = "#334155";
+  } else {
+    if (blockGuest()) return;
+    subComp.style.display = "none"; subMgmt.style.display = "";
+    tabComp.style.background = "#eef2f7"; tabComp.style.color = "#334155";
+    tabMgmt.style.background = "#2563eb"; tabMgmt.style.color = "#fff";
+    renderManageData();
+  }
+}
+
+/* ========== MANAGE MESIN/AREA ========== */
+function renderManageData() {
+  const tbArea = document.getElementById("area-manage-body");
+  if (tbArea) {
+    if (!areaList.length) tbArea.innerHTML = '<tr><td colspan="4" class="empty-row">Belum ada area</td></tr>';
+    else tbArea.innerHTML = areaList.map((a, i) => `
+      <tr><td>${i+1}</td><td class="employee-name">${escapeHtml(a.area)}</td><td><span class="line-pill">${escapeHtml(a.sheetForm)}</span></td>
+      <td style="text-align:right"><button class="btn btn-sm btn-danger" onclick="hapusArea('${escapeHtml(a.area)}')">🗑 Hapus</button></td></tr>
+    `).join("");
+  }
+  const tbMesin = document.getElementById("mesin-manage-body");
+  if (tbMesin) {
+    if (!mesinList.length) tbMesin.innerHTML = '<tr><td colspan="4" class="empty-row">Belum ada mesin</td></tr>';
+    else tbMesin.innerHTML = mesinList.map((m, i) => `
+      <tr><td>${i+1}</td><td class="employee-name">${escapeHtml(m.mesin)}</td><td><span class="line-pill">${escapeHtml(m.area)}</span></td>
+      <td style="text-align:right"><button class="btn btn-sm btn-danger" onclick="hapusMesin('${escapeHtml(m.area)}','${escapeHtml(m.mesin)}')">🗑 Hapus</button></td></tr>
+    `).join("");
+  }
+  const btnTambahMesin = document.getElementById("btn-tambah-mesin");
+  if (btnTambahMesin) btnTambahMesin.disabled = areaList.length === 0;
+}
+
+function openAreaModal() {
+  if (blockGuest()) return;
+  document.getElementById("a-nama").value = ""; document.getElementById("area-modal").classList.add("show");
+}
+async function saveArea() {
+  if (blockGuest()) return;
+  const area = document.getElementById("a-nama").value.trim();
+  if (!area) return toast("Nama area wajib diisi", true);
+  const tag = getUserTag();
+  try {
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addArea", data: { area, user: tag.user, username: tag.username } }) });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message);
+    toast("✓ Area berhasil dibuat + sheet Form " + area);
+    closeModal("area-modal");
+    await muatSemuaData();
+    renderManageData();
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+async function hapusArea(area) {
+  if (blockGuest()) return;
+  if (!confirm(`Hapus area "${area}"?\n\nSemua mesin di area ini akan dihapus.\nSheet Form tidak dihapus otomatis.`)) return;
+  const tag = getUserTag();
+  try {
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "deleteArea", data: { area, user: tag.user, username: tag.username } }) });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message);
+    toast("✓ Area dihapus");
+    await muatSemuaData();
+    renderManageData();
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+function openMesinModal() {
+  if (blockGuest()) return;
+  if (!areaList.length) return toast("Tambahkan area dulu", true);
+  isiAreaDropdown();
+  document.getElementById("m-area").value = "";
+  document.getElementById("m-nama").value = "";
+  document.getElementById("mesin-modal").classList.add("show");
+}
+async function saveMesin() {
+  if (blockGuest()) return;
+  const area = document.getElementById("m-area").value;
+  const mesin = document.getElementById("m-nama").value.trim();
+  if (!area || !mesin) return toast("Lengkapi data", true);
+  const tag = getUserTag();
+  try {
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addMesin", data: { area, mesin, user: tag.user, username: tag.username } }) });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message);
+    toast("✓ Mesin berhasil ditambahkan");
+    closeModal("mesin-modal");
+    await muatSemuaData();
+    renderManageData();
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+async function hapusMesin(area, mesin) {
+  if (blockGuest()) return;
+  if (!confirm(`Hapus mesin "${mesin}" dari area "${area}"?`)) return;
+  const tag = getUserTag();
+  try {
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "deleteMesin", data: { area, mesin, user: tag.user, username: tag.username } }) });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message);
+    toast("✓ Mesin dihapus");
+    await muatSemuaData();
+    renderManageData();
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+
+/* ========== NAVIGASI ========== */
+document.querySelectorAll(".nav-item").forEach(btn => btn.addEventListener("click", () => {
+  document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById(btn.dataset.view + "-view").classList.add("active");
+  renderAll();
+  if (btn.dataset.view === "kriteria") loadKriteriaAdmin();
+  if (btn.dataset.view === "audit") loadAuditLog();
+  if (btn.dataset.view === "machine") switchMachineTab("competency");
+}));
+document.getElementById("raport-area-filter").addEventListener("change", () => { isiMesinRaportFilter(); renderRaport(); });
+
+/* ========== BACKUP ========== */
+async function lakukanBackup() {
+  if (blockGuest()) return;
+  if (!confirm("Buat file backup sekarang?")) return;
+  try {
+    toast("Membuat backup...");
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "backup" }) });
+    const data = await res.json();
+    if (!data.ok) { toast(data.message || "Gagal backup", true); return; }
+    toast("✓ Backup berhasil! File: " + data.fileName);
+    if (data.url) setTimeout(() => { if (confirm("Buka file backup sekarang?")) window.open(data.url, "_blank"); }, 500);
+  } catch (e) { toast("Gagal backup: " + e.message, true); }
+}
+
+/* ========== MODAL INPUT NILAI ========== */
+function openFormModal() {
+  if (blockGuest()) return;
+  if (!currentUser) return;
+  isiOrganizationFilter();
+  isiEmployeeFilter();
+  const areaSel = document.getElementById("form-area");
+  areaSel.innerHTML = '<option value="">— Pilih Area —</option>' + Object.keys(allData.mesin).map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
+  document.getElementById("form-assessor").value = currentUser.nama || "-";
+  document.getElementById("form-assessor-jabatan").value = currentUser.posisi || "-";
+  resetFormPenuh();
+  document.getElementById("form-modal").classList.add("show");
+}
+function isiEmployeeFilter(selectedEmployeeId = "") {
+  const empSel = document.getElementById("form-employee");
+  const orgSel = document.getElementById("form-organization");
+  if (!empSel) return;
+  const selectedOrg = orgSel ? String(orgSel.value || "").trim() : "";
+  const selectedOrgNorm = selectedOrg ? toTitleCase(selectedOrg).toLowerCase() : "";
+  const activeEmployees = allData.personel.filter(p => (p["Status"] || "Aktif") !== "Non Aktif");
+  const filtered = selectedOrgNorm
+    ? activeEmployees.filter(p => toTitleCase(p["Organization Name"] || "").toLowerCase() === selectedOrgNorm)
+    : activeEmployees;
+  empSel.innerHTML = '<option value="">— Pilih Karyawan —</option>' +
+    filtered.map(p => `<option value="${escapeHtml(p["Employee ID"])}">${escapeHtml(p["Employee Name"])} — ${escapeHtml(p["Job Title Name"] || "")}</option>`).join("");
+  if (selectedEmployeeId && filtered.some(p => String(p["Employee ID"]) === String(selectedEmployeeId))) {
+    empSel.value = selectedEmployeeId;
+  } else {
+    empSel.value = "";
+  }
+}
+function onOrganizationChange() {
+  const empSel = document.getElementById("form-employee");
+  const currentEmployee = empSel ? empSel.value : "";
+  isiEmployeeFilter();
+  if (!empSel.value) {
+    onEmployeeChange();
+  } else if (currentEmployee) {
+    onEmployeeChange();
+  }
+}
+function onEmployeeChange() {
+  const empId = document.getElementById("form-employee").value;
+  if (!empId) { document.getElementById("form-nik").value = ""; document.getElementById("form-tgl-masuk").value = ""; document.getElementById("form-jabatan").value = ""; return; }
+  const emp = allData.personel.find(p => String(p["Employee ID"]) === empId);
+  if (!emp) return;
+  document.getElementById("form-nik").value = emp["Employee ID"] || "-";
+  document.getElementById("form-tgl-masuk").value = emp["Start Date"] || "-";
+  document.getElementById("form-jabatan").value = emp["Job Title Name"] || "-";
+  const org = String(emp["Organization Name"] || "").trim();
+  const areaSel = document.getElementById("form-area");
+  const match = Object.keys(allData.mesin).find(a => org.toLowerCase().includes(a.toLowerCase()));
+  if (match) { areaSel.value = match; onAreaChange(); }
+  else { const mesinSel = document.getElementById("form-mesin"); if (mesinSel.value) onMesinChange(); }
+}
+function resetFormPenuh() {
+  resetBuktiFoto();
+  document.getElementById("form-mesin").innerHTML = '<option value="">— Pilih Mesin —</option>';
+  document.getElementById("form-nik").value = "";
+  document.getElementById("form-tgl-masuk").value = "";
+  document.getElementById("form-jabatan").value = "";
+  document.getElementById("form-subtitle").textContent = "Pilih karyawan & mesin untuk memulai penilaian";
+  kriteriaAktif = []; checkedKriteria = new Set(); catatanKriteria = {}; tanggalKriteria = {};
+  gradeTerbuka = ["A"]; gradeLulus = new Set();
+  document.getElementById("form-kriteria-wrapper").style.display = "none";
+  document.getElementById("form-kriteria-empty").style.display = "none";
+  document.getElementById("form-btn-simpan").disabled = true;
+  document.getElementById("form-btn-reset").style.display = "none";
+}
+function onAreaChange() {
+  const area = document.getElementById("form-area").value;
+  const mesinSel = document.getElementById("form-mesin");
+  if (area) {
+    const listMesin = allData.mesin[area] || [];
+    mesinSel.innerHTML = '<option value="">— Pilih Mesin —</option>' + listMesin.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("");
+  } else mesinSel.innerHTML = '<option value="">— Pilih Mesin —</option>';
+  onMesinChange();
+}
+async function onMesinChange() {
+  const area = document.getElementById("form-area").value;
+  const mesin = document.getElementById("form-mesin").value;
+  const empId = document.getElementById("form-employee").value;
+  const wrapper = document.getElementById("form-kriteria-wrapper");
+  const empty = document.getElementById("form-kriteria-empty");
+  if (!area || !mesin) {
+    wrapper.style.display = "none"; empty.style.display = "none";
+    kriteriaAktif = []; checkedKriteria = new Set();
+    document.getElementById("form-btn-simpan").disabled = true;
+    return;
+  }
+  document.getElementById("form-subtitle").textContent = `${area} · ${mesin}`;
+  const body = document.getElementById("form-grade-sections");
+  body.innerHTML = '<div style="text-align:center;padding:30px;color:#64748b">Memuat kriteria...</div>';
+  wrapper.style.display = "block"; empty.style.display = "none";
+  try {
+    const url = API_URL + "?action=getKriteria&area=" + encodeURIComponent(area) + "&mesin=" + encodeURIComponent(mesin);
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.ok || !data.kriteria || !data.kriteria.length) {
+      wrapper.style.display = "none"; empty.style.display = "block";
+      kriteriaAktif = []; checkedKriteria = new Set();
+      document.getElementById("form-btn-simpan").disabled = true;
+      return;
+    }
+    kriteriaAktif = data.kriteria;
+    let riwayatTerakhir = null;
+    if (empId) {
+      const matching = allData.report.filter(r =>
+        String(r["NIK"] || "").trim() === String(empId).trim() &&
+        String(r["Mesin"] || "").trim() === String(mesin).trim() &&
+        String(r["Area"] || "").trim() === String(area).trim()
+      ).sort((a, b) => String(b["Timestamp"]).localeCompare(String(a["Timestamp"])));
+      if (matching.length > 0) riwayatTerakhir = matching[0];
+    }
+    checkedKriteria = new Set(); catatanKriteria = {}; tanggalKriteria = {};
+    gradeTerbuka = ["A"]; gradeLulus = new Set();
+    if (riwayatTerakhir && riwayatTerakhir["Detail Kriteria"]) {
+      let detailLama = [];
+      try { detailLama = JSON.parse(riwayatTerakhir["Detail Kriteria"]); } catch(e) { detailLama = []; }
+      detailLama.forEach((d) => {
+        const kriteriaMatch = kriteriaAktif.findIndex((k, i) => !checkedKriteria.has(i) && k.item === d.item && k.grade === d.grade);
+        if (kriteriaMatch >= 0 && d.terpenuhi) {
+          checkedKriteria.add(kriteriaMatch);
+          if (d.tanggal) tanggalKriteria[kriteriaMatch] = d.tanggal;
+          if (d.catatan) catatanKriteria[kriteriaMatch] = d.catatan;
+        }
+      });
+      cekKelulusanGrade();
+      if (checkedKriteria.size > 0) {
+        const gradeLama = [...gradeLulus].sort();
+        toast(`✓ Melanjutkan penilaian. Grade ${gradeLama.join(", ")} sudah lulus sebelumnya.`, false, "info");
+      }
+    }
+    renderGradeSections();
+    document.getElementById("form-btn-reset").style.display = "";
+  } catch (e) {
+    console.error(e);
+    body.innerHTML = `<div style="text-align:center;padding:30px;color:#dc2626">Gagal memuat: ${e.message}</div>`;
+  }
+}
+function renderGradeSections() {
+  const container = document.getElementById("form-grade-sections");
+  const order = ["A", "B", "C", "D"];
+  const html = order.map(g => {
+    const items = kriteriaAktif.map((k, i) => ({ ...k, idx: i })).filter(k => k.grade === g);
+    if (!items.length) return "";
+    const isLocked = !gradeTerbuka.includes(g);
+    const isPassed = gradeLulus.has(g);
+    const isActive = !isLocked && !isPassed;
+    let sectionCls = "grade-section";
+    if (isLocked) sectionCls += " locked";
+    if (isPassed) sectionCls += " passed";
+    if (isActive) sectionCls += " active";
+    const total = items.length;
+    const lulus = items.filter(k => checkedKriteria.has(k.idx)).length;
+    const pct = total > 0 ? Math.round(lulus / total * 100) : 0;
+    let statusBadge = "";
+    if (isPassed) statusBadge = `<span class="grade-status passed">✓ LULUS 100%</span>`;
+    else if (isActive) statusBadge = `<span class="grade-status active">⏳ ${pct}% (${lulus}/${total})</span>`;
+    else statusBadge = `<span class="grade-status locked">🔒 Terkunci</span>`;
+    return `<div class="${sectionCls}" data-grade="${g}">
+        <div class="grade-section-header">
+          <div class="grade-title-wrap"><div class="grade-circle g${g}">${g}</div><div class="grade-section-info"><h4>Grade ${g} — ${GRADE_LEVELS[g]}</h4><p>${items.length} item penilaian</p></div></div>
+          ${statusBadge}
+        </div>
+        <div class="table-scroll">
+          <table style="min-width:800px">
+            <thead><tr><th style="width:50px">No</th><th style="width:70px;text-align:center">K</th><th>Item Penilaian</th><th style="width:90px;text-align:center">Penilaian</th><th style="width:140px">Tanggal</th><th style="width:170px">Catatan</th></tr></thead>
+            <tbody>
+              ${items.map(k => {
+                const disabled = isLocked;
+                const isChecked = checkedKriteria.has(k.idx);
+                const katLabel = k.kategori || "-";
+                return `<tr id="row-krit-${k.idx}" class="${isChecked ? 'row-lulus' : ''}">
+                    <td style="text-align:center;font-weight:600;color:#64748b">${k.no}</td>
+                    <td style="text-align:center"><span class="kat-badge kat-${katLabel === '-' ? '-' : katLabel}">${katLabel}</span></td>
+                    <td style="font-weight:500">${escapeHtml(k.item)}</td>
+                    <td style="text-align:center"><div class="kriteria-check-box ${isChecked ? 'checked' : ''} ${disabled ? 'disabled' : ''}" onclick="${disabled ? '' : `toggleKriteriaForm(${k.idx})`}" id="check-${k.idx}"></div></td>
+                    <td><input type="text" class="mini-field" id="tgl-${k.idx}" placeholder="Tanggal..." value="${escapeHtml(tanggalKriteria[k.idx]||'')}" ${disabled ? 'disabled' : `oninput="setTanggal(${k.idx}, this.value)"`}></td>
+                    <td><input type="text" class="mini-field" id="cat-${k.idx}" placeholder="Catatan..." value="${escapeHtml(catatanKriteria[k.idx]||'')}" ${disabled ? 'disabled' : `oninput="setCatatan(${k.idx}, this.value)"`}></td>
+                  </tr>`;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join("");
+  container.innerHTML = html;
+  updateSkorForm();
+}
+function toggleKriteriaForm(idx) {
+  if (blockGuest()) return;
+  if (checkedKriteria.has(idx)) checkedKriteria.delete(idx);
+  else checkedKriteria.add(idx);
+  if (checkedKriteria.has(idx) && !tanggalKriteria[idx]) tanggalKriteria[idx] = new Date().toLocaleDateString("id-ID");
+  cekKelulusanGrade();
+  renderGradeSections();
+}
+function setTanggal(idx, val) { tanggalKriteria[idx] = val; }
+function setCatatan(idx, val) { catatanKriteria[idx] = val; }
+function hitungPerGrade() {
+  const result = { A: { total:0, lulus:0 }, B: { total:0, lulus:0 }, C: { total:0, lulus:0 }, D: { total:0, lulus:0 } };
+  kriteriaAktif.forEach((k, i) => {
+    const g = k.grade;
+    if (!result[g]) return;
+    result[g].total++;
+    if (checkedKriteria.has(i)) result[g].lulus++;
+  });
+  return result;
+}
+function cekKelulusanGrade() {
+  const perGrade = hitungPerGrade();
+  const order = ["A", "B", "C", "D"];
+  const lulusBaru = new Set();
+  const terbukaBaru = ["A"];
+  for (const g of order) {
+    const s = perGrade[g];
+    if (s.total > 0 && s.lulus === s.total) {
+      lulusBaru.add(g);
+      const idx = order.indexOf(g);
+      if (idx < order.length - 1) terbukaBaru.push(order[idx + 1]);
+    } else break;
+  }
+  gradeLulus = lulusBaru;
+  gradeTerbuka = [...new Set(terbukaBaru)];
+}
+function hitungGradeFinal() {
+  const order = ["D", "C", "B", "A"];
+  for (const g of order) if (gradeLulus.has(g)) return g;
+  return null;
+}
+function updateSkorForm() {
+  const perGrade = hitungPerGrade();
+  cekKelulusanGrade();
+  const gradeFinal = hitungGradeFinal();
+  const box = document.getElementById("form-grade-final-box");
+  const letter = document.getElementById("form-grade-final-letter");
+  const name = document.getElementById("form-grade-final-name");
+  const progress = document.getElementById("form-progress-text");
+  const colors = { A:"#f59e0b", B:"#3b82f6", C:"#22c55e", D:"#8b5cf6" };
+  if (gradeFinal) {
+    letter.textContent = gradeFinal; letter.style.color = colors[gradeFinal];
+    name.textContent = "✓ " + GRADE_LEVELS[gradeFinal]; name.style.color = colors[gradeFinal];
+    box.style.borderColor = colors[gradeFinal]; box.style.background = colors[gradeFinal] + "15";
+  } else {
+    letter.textContent = "-"; letter.style.color = "#64748b";
+    name.textContent = "Belum lulus grade apapun"; name.style.color = "#64748b";
+    box.style.borderColor = "#e7edf5"; box.style.background = "#fff";
+  }
+  const statusList = ["A","B","C","D"].map(g => {
+    const s = perGrade[g];
+    if (s.total === 0) return `${g}: -`;
+    if (gradeLulus.has(g)) return `${g}: ✓`;
+    return `${g}: ${s.lulus}/${s.total}`;
+  }).join("  ·  ");
+  progress.textContent = statusList;
+  const empId = document.getElementById("form-employee").value;
+  document.getElementById("form-btn-simpan").disabled = !empId || kriteriaAktif.length === 0 || checkedKriteria.size === 0;
+}
+function resetProgressive() {
+  if (blockGuest()) return;
+  if (!confirm("Reset semua centang?")) return;
+  checkedKriteria = new Set(); catatanKriteria = {}; tanggalKriteria = {};
+  gradeTerbuka = ["A"]; gradeLulus = new Set();
+  renderGradeSections();
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove("show");
+  if (id === "form-modal") resetFormPenuh();
+}
+let buktiFotoState = { file: null, dataUrl: "", nama: "", mime: "", ukuran: 0 };
+
+function formatUkuranFile(bytes) {
+  if (!bytes) return "0 B";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function resetBuktiFoto() {
+  buktiFotoState = { file: null, dataUrl: "", nama: "", mime: "", ukuran: 0 };
+  const input = document.getElementById("form-bukti-foto");
+  const preview = document.getElementById("form-bukti-preview");
+  const img = document.getElementById("form-bukti-image");
+  const name = document.getElementById("form-bukti-name");
+  const size = document.getElementById("form-bukti-size");
+  const status = document.getElementById("form-bukti-status");
+  if (input) input.value = "";
+  if (preview) preview.style.display = "none";
+  if (img) img.removeAttribute("src");
+  if (name) name.textContent = "";
+  if (size) size.textContent = "";
+  if (status) status.textContent = "";
+}
+
+function pilihBuktiFoto(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) { event.target.value = ""; return toast("File harus berupa foto/gambar", true); }
+  if (file.size > 10 * 1024 * 1024) { event.target.value = ""; return toast("Ukuran foto maksimal 10 MB", true); }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = async () => {
+      try {
+        const maxSide = 1400;
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+        const approxBytes = Math.max(0, Math.round((dataUrl.length - dataUrl.indexOf(",") - 1) * 0.75));
+        buktiFotoState = { file, dataUrl, nama: file.name, mime: "image/jpeg", ukuran: approxBytes };
+        const preview = document.getElementById("form-bukti-preview");
+        const image = document.getElementById("form-bukti-image");
+        const name = document.getElementById("form-bukti-name");
+        const size = document.getElementById("form-bukti-size");
+        const status = document.getElementById("form-bukti-status");
+        if (image) image.src = dataUrl;
+        if (name) name.textContent = file.name;
+        if (size) size.textContent = `Ukuran setelah kompresi: ${formatUkuranFile(approxBytes)}`;
+        if (status) status.textContent = "✓ Foto siap dilampirkan saat penilaian disimpan.";
+        if (preview) preview.style.display = "block";
+      } catch (e) { toast("Foto gagal diproses", true); }
+    };
+    img.onerror = () => toast("Foto tidak dapat dibaca", true);
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function hapusBuktiFoto() { resetBuktiFoto(); }
+
+async function uploadBuktiFotoKeServer(emp, area, mesin) {
+  if (!buktiFotoState.dataUrl) return { ok: true, url: "", fileId: "" };
+  const status = document.getElementById("form-bukti-status");
+  if (status) status.textContent = "⏳ Mengirim foto bukti...";
+  const payload = {
+    action: "uploadBuktiFoto",
+    data: {
+      employeeId: emp["Employee ID"],
+      nama: emp["Employee Name"],
+      area, mesin,
+      fileName: buktiFotoState.nama,
+      mimeType: buktiFotoState.mime,
+      base64: buktiFotoState.dataUrl.split(",")[1],
+      user: currentUser?.nama || "",
+      username: currentUser?.username || ""
+    }
+  };
+  const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.message || "Upload foto gagal");
+  if (status) status.textContent = "✓ Foto berhasil dikirim.";
+  return { ok: true, url: data.url || data.fileUrl || "", fileId: data.fileId || "" };
+}
+
+async function simpanForm() {
+  if (blockGuest()) return;
+  const empId = document.getElementById("form-employee").value;
+  const emp = allData.personel.find(p => String(p["Employee ID"]) === empId);
+  if (!emp) { toast("Pilih karyawan dulu", true); return; }
+  const area = document.getElementById("form-area").value;
+  const mesin = document.getElementById("form-mesin").value;
+  const gradeFinal = hitungGradeFinal() || "-";
+  const perGrade = hitungPerGrade();
+  const gradeDinilai = gradeTerbuka[gradeTerbuka.length - 1] || "A";
+  const total = kriteriaAktif.length;
+  const lulus = checkedKriteria.size;
+  const skor = total > 0 ? Math.round(lulus / total * 100) : 0;
+  const ringkasanGrade = ["A","B","C","D"].map(g => ({ grade: g, level: GRADE_LEVELS[g], total: perGrade[g].total, lulus: perGrade[g].lulus, status: gradeLulus.has(g) ? "LULUS" : (perGrade[g].total === 0 ? "-" : "BELUM") }));
+  const detailKriteria = kriteriaAktif.map((k, i) => ({ no: k.no, grade: k.grade, kategori: k.kategori, item: k.item, terpenuhi: checkedKriteria.has(i), tanggal: tanggalKriteria[i] || "", catatan: catatanKriteria[i] || "" }));
+  let buktiFoto = { url: "", fileId: "" };
+  try {
+    if (buktiFotoState.dataUrl) buktiFoto = await uploadBuktiFotoKeServer(emp, area, mesin);
+    const payload = {
+      action: "simpanForm",
+      data: {
+        employeeId: emp["Employee ID"],
+        nama: emp["Employee Name"],
+        jabatan: emp["Job Title Name"] || "",
+        line: emp["Organization Name"] || "",
+        area, mesin,
+        gradeDinilai, gradeFinal,
+        totalItem: total, itemLulus: lulus, skor,
+        assessor: currentUser.nama,
+        assessorUsername: currentUser.username,
+        ringkasanGrade: JSON.stringify(ringkasanGrade),
+        detailKriteria: JSON.stringify(detailKriteria),
+        catatan: "",
+        buktiFotoUrl: buktiFoto.url,
+        buktiFotoFileId: buktiFoto.fileId,
+        buktiFotoNama: buktiFotoState.nama || ""
+      }
+    };
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!data.ok) { toast(data.message || "Gagal simpan", true); return; }
+    toast(`✓ Tersimpan — Grade Final: ${gradeFinal} (${skor}%)`);
+    closeModal("form-modal");
+    muatSemuaData();
+  } catch (e) { toast("Gagal konek server", true); }
+}
+async function hapusReport(ts) {
+  if (blockGuest()) return;
+  if (!confirm("Hapus data penilaian ini?")) return;
+  const tag = getUserTag();
+  try {
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "hapusReport", timestamp: ts, user: tag.user, username: tag.username }) });
+    const data = await res.json();
+    if (!data.ok) { toast(data.message, true); return; }
+    toast("Data dihapus"); muatSemuaData();
+  } catch (e) { toast("Gagal hapus", true); }
+}
+
+/* ========== PERSONEL CRUD ========== */
+function openPersonelModal() {
+  if (blockGuest()) return;
+  document.getElementById("personel-modal-title").textContent = "Tambah Personel";
+  document.getElementById("p-edit-mode").value = "";
+  document.getElementById("p-id").value = ""; document.getElementById("p-id").disabled = false;
+  document.getElementById("p-nama").value = ""; document.getElementById("p-jabatan").value = "";
+  document.getElementById("p-level").value = "";
+  isiOrganizationDropdownPersonel();
+  document.getElementById("p-gender").value = ""; document.getElementById("p-start").value = "";
+  document.getElementById("p-status").value = "Aktif";
+  document.getElementById("personel-modal").classList.add("show");
+}
+function editPersonel(id) {
+  if (blockGuest()) return;
+  const p = allData.personel.find(x => String(x["Employee ID"]) === String(id));
+  if (!p) return;
+  document.getElementById("personel-modal-title").textContent = "Edit Personel";
+  document.getElementById("p-edit-mode").value = id;
+  document.getElementById("p-id").value = p["Employee ID"] || ""; document.getElementById("p-id").disabled = true;
+  document.getElementById("p-nama").value = p["Employee Name"] || "";
+  document.getElementById("p-jabatan").value = p["Job Title Name"] || "";
+  document.getElementById("p-level").value = p["Job Level Name"] || "";
+  isiOrganizationDropdownPersonel(p["Organization Name"] || "");
+  document.getElementById("p-gender").value = p["Gender"] || "";
+  document.getElementById("p-start").value = String(p["Start Date"] || "").slice(0, 10);
+  document.getElementById("p-status").value = p["Status"] || "Aktif";
+  document.getElementById("personel-modal").classList.add("show");
+}
+async function savePersonel() {
+  if (blockGuest()) return;
+  const editMode = document.getElementById("p-edit-mode").value;
+  const tag = getUserTag();
+  const data = {
+    nik: document.getElementById("p-id").value.trim(),
+    nama: document.getElementById("p-nama").value.trim(),
+    jabatan: document.getElementById("p-jabatan").value.trim(),
+    jobLevel: document.getElementById("p-level").value.trim(),
+    organization: getOrgPersonelValue(),
+    gender: document.getElementById("p-gender").value,
+    startDate: document.getElementById("p-start").value,
+    status: document.getElementById("p-status").value,
+    user: tag.user,
+    username: tag.username
+  };
+  if (!data.nik || !data.nama) return toast("Employee ID & Nama wajib diisi", true);
+  if (!data.organization) return toast("Pilih Organization dulu", true);
+  try {
+    const action = editMode ? "updatePersonel" : "addPersonel";
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action, data }) });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.message || "Gagal");
+    toast(editMode ? "Personel diperbarui" : "Personel ditambahkan");
+    closeModal("personel-modal"); await muatSemuaData();
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+async function setStatus(nik, status) {
+  if (blockGuest()) return;
+  const p = allData.personel.find(x => String(x["Employee ID"]) === String(nik));
+  const nm = p ? p["Employee Name"] : nik;
+  const verb = status === "Non Aktif" ? "non-aktifkan" : "aktifkan kembali";
+  if (!confirm(`Yakin ingin ${verb} ${nm}?`)) return;
+  const tag = getUserTag();
+  try {
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "setStatusPersonel", data: { nik, status, user: tag.user, username: tag.username } }) });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.message);
+    toast(`Status diubah menjadi ${status}`); await muatSemuaData();
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+async function deletePersonel(nik) {
+  if (blockGuest()) return;
+  const p = allData.personel.find(x => String(x["Employee ID"]) === String(nik));
+  const nm = p ? p["Employee Name"] : nik;
+  if (!confirm(`HAPUS PERMANEN: Hapus "${nm}" (${nik})?\n\nGunakan "Non Aktifkan" kalau hanya ingin menyembunyikan.`)) return;
+  const tag = getUserTag();
+  try {
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "deletePersonel", data: { nik, user: tag.user, username: tag.username } }) });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.message);
+    toast("Personel dihapus permanen"); await muatSemuaData();
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+
+/* ========== USER CRUD ========== */
+function openUserModal() {
+  if (blockGuest()) return;
+  document.getElementById("u-nama").value = ""; document.getElementById("u-username").value = "";
+  document.getElementById("u-password").value = ""; document.getElementById("u-posisi").value = "Assessor";
+  document.getElementById("user-modal").classList.add("show");
+}
+async function saveUser() {
+  if (blockGuest()) return;
+  const tag = getUserTag();
+  const data = { nama: document.getElementById("u-nama").value.trim(), username: document.getElementById("u-username").value.trim(), password: document.getElementById("u-password").value, posisi: document.getElementById("u-posisi").value, adminUser: tag.username, adminName: tag.user };
+  if (!data.username || !data.password) return toast("Username & password wajib", true);
+  try {
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addUser", data }) });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.message);
+    toast("User ditambahkan"); closeModal("user-modal");
+  } catch (e) { toast("Gagal: " + e.message, true); }
+}
+
+/* ========== REFRESH ========== */
+async function manualRefresh() {
+  const btn = document.getElementById("btn-refresh");
+  const icon = document.getElementById("refresh-icon");
+  const text = document.getElementById("refresh-text");
+  if (!btn) return;
+  btn.disabled = true; text.textContent = "Memuat..."; icon.style.animation = "spin 1s linear infinite";
+  try { await muatSemuaData(); toast("Data dimuat ulang"); } catch (e) { toast("Gagal refresh", true); }
+  finally { btn.disabled = false; text.textContent = "Refresh"; icon.style.animation = ""; }
+}
+async function checkForUpdates() {
+  if (!currentUser) return;
+  try {
+    const res = await fetch(API_URL + "?action=getAll");
+    const data = await res.json();
+    if (!data.ok) return;
+    const h = JSON.stringify({ p: (data.personel || []).length, r: (data.report || []).length, m: Object.keys(data.mesin || {}).length });
+    if (_lastHash && h !== _lastHash) {
+      allData.personel = data.personel || []; allData.report = data.report || []; allData.mesin = data.mesin || {};
+      allData.totalMesin = data.totalMesin || 0;
+      _lastHash = h; renderAll(); renderTop10(); renderGrafikAlat(); renderReminderBanner(); toast("✓ Data ter-update");
+    }
+  } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden && currentUser) checkForUpdates(); });
+setInterval(() => { if (!document.hidden && currentUser) checkForUpdates(); }, 60000);
+
+/* ========== EXPORT PDF ========== */
+function exportPDF() {
+  if (blockGuest()) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape" });
+  doc.setFontSize(16); doc.text("Competency Report", 14, 15);
+  doc.setFontSize(10); doc.text(`Oleh: ${currentUser.nama} · ${new Date().toLocaleString("id-ID")}`, 14, 22);
+  const body = allData.report.map(r => [r["Timestamp"], r["NIK"], r["Nama"], r["Area"], r["Mesin"], r["Grade Dinilai"], r["Item Lulus"]+"/"+r["Total Item"], hitungSkorDariDetail(r)+"%", r["Grade Final"]]);
+  doc.autoTable({ startY: 28, head: [["Waktu","NIK","Nama","Area","Mesin","Grade","Lulus/Total","Skor","Grade Final"]], body, styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] } });
+  doc.save(`competency-${new Date().toISOString().slice(0,10)}.pdf`);
+  toast("PDF diunduh");
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = sessionStorage.getItem("user");
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    if (currentUser.role) currentUser.role = String(currentUser.role).toLowerCase();
+    masukDashboard();
+  }
+});
+</script>
+</body>
+</html>
